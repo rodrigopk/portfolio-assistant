@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -16,13 +17,13 @@ interface HealthCheck {
 }
 
 // Basic health check
-router.get('/', async (req: Request, res: Response): Promise<void> => {
+router.get('/', (_req: Request, res: Response): void => {
   try {
     const healthCheck: HealthCheck = {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env['NODE_ENV'] || 'development',
       checks: {
         // TODO: Add actual health checks for dependencies
         // database: await checkDatabase(),
@@ -43,7 +44,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Readiness probe (for Kubernetes/container orchestration)
-router.get('/ready', async (req: Request, res: Response): Promise<void> => {
+router.get('/ready', (_req: Request, res: Response): void => {
   try {
     // TODO: Add checks for critical dependencies
     // const databaseReady = await checkDatabase();
@@ -68,7 +69,7 @@ router.get('/ready', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Liveness probe (for Kubernetes/container orchestration)
-router.get('/live', (req: Request, res: Response): void => {
+router.get('/live', (_req: Request, res: Response): void => {
   res.status(200).json({
     status: 'alive',
     timestamp: new Date().toISOString(),

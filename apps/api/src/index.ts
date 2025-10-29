@@ -1,16 +1,17 @@
 import dotenv from 'dotenv';
+
 import app from './app';
 import { logger } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
 
-const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST || 'localhost';
+const PORT = process.env['PORT'] || 3001;
+const HOST = process.env['HOST'] || 'localhost';
 
 // Start server
 const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode`);
+  logger.info(`Server running in ${process.env['NODE_ENV'] || 'development'} mode`);
   logger.info(`Listening on http://${HOST}:${PORT}`);
 });
 

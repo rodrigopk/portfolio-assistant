@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+
 import { logger } from '../utils/logger';
 
 export interface ApiError extends Error {
@@ -32,7 +33,7 @@ export const errorHandler = (
     error: {
       code: err.code || 'INTERNAL_ERROR',
       message,
-      ...(process.env.NODE_ENV === 'development' && {
+      ...(process.env['NODE_ENV'] === 'development' && {
         stack: err.stack,
         details: err.details,
       }),
@@ -42,7 +43,7 @@ export const errorHandler = (
 
 export class AppError extends Error implements ApiError {
   constructor(
-    public message: string,
+    public override message: string,
     public statusCode: number,
     public code?: string,
     public details?: unknown

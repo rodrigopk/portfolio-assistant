@@ -39,13 +39,13 @@ DevPortfolio AI is a next-generation portfolio website that leverages artificial
 
 ### 1.3 Technology Stack Summary
 
-| Component | Technologies |
-|-----------|-------------|
-| **Frontend** | React 18+, TypeScript, TailwindCSS, React Query, Framer Motion |
-| **Backend** | Node.js 20+, Express.js, TypeScript, Prisma ORM |
-| **AI Framework** | Mastra AI Agent Framework, Anthropic Claude Sonnet 4.5 |
-| **Database** | PostgreSQL with pgvector, Redis, Pinecone (vector DB) |
-| **Infrastructure** | Docker, Turborepo, GitHub Actions CI/CD |
+| Component          | Technologies                                                   |
+| ------------------ | -------------------------------------------------------------- |
+| **Frontend**       | React 18+, TypeScript, TailwindCSS, React Query, Framer Motion |
+| **Backend**        | Node.js 20+, Express.js, TypeScript, Prisma ORM                |
+| **AI Framework**   | Mastra AI Agent Framework, Anthropic Claude Sonnet 4.5         |
+| **Database**       | PostgreSQL with pgvector, Redis, Pinecone (vector DB)          |
+| **Infrastructure** | Docker, Turborepo, GitHub Actions CI/CD                        |
 
 ### 1.4 Expected Outcomes
 
@@ -251,7 +251,6 @@ The Chat Agent has access to these functions for dynamic interaction:
 ```typescript
 // packages/agents/src/chat-agent.ts
 import { Agent, Tool } from '@mastra/core';
-import { anthropic } from '@mastra/anthropic';
 
 const searchProjectsTool = new Tool({
   name: 'searchProjects',
@@ -275,7 +274,7 @@ const searchProjectsTool = new Tool({
 
 export const chatAgent = new Agent({
   name: 'portfolio-chat',
-  model: anthropic('claude-sonnet-4.5'),
+  model: "anthropic/claude-3-5-haiku-20241022",
   systemPrompt: CHAT_SYSTEM_PROMPT,
   tools: [searchProjectsTool, getProjectDetailsTool, ...],
   memory: {
@@ -332,9 +331,9 @@ export const proposalAgent = new Agent({
       { name: 'extract', prompt: EXTRACTION_PROMPT },
       { name: 'match', prompt: MATCHING_PROMPT, tools: [searchProjectsTool] },
       { name: 'estimate', prompt: ESTIMATION_PROMPT },
-      { name: 'generate', prompt: GENERATION_PROMPT }
-    ]
-  }
+      { name: 'generate', prompt: GENERATION_PROMPT },
+    ],
+  },
 });
 ```
 
@@ -453,12 +452,12 @@ Formula: (Optimistic + 4 * Most Likely + Pessimistic) / 6
 const context = await vectorDB.search({
   query: userMessage,
   topK: 5,
-  filter: { category: 'projects' }
+  filter: { category: 'projects' },
 });
 
 const enhancedPrompt = `
 Relevant information:
-${context.map(c => c.content).join('\n\n')}
+${context.map((c) => c.content).join('\n\n')}
 
 User question: ${userMessage}
 `;
@@ -741,8 +740,8 @@ async function main() {
       bio: 'Experienced full-stack engineer...',
       shortBio: 'Building scalable web applications',
       yearsExperience: 8,
-      availability: 'limited'
-    }
+      availability: 'limited',
+    },
   });
 
   // Create skills
@@ -750,8 +749,8 @@ async function main() {
     data: [
       { name: 'Ruby', category: 'language', proficiency: 5, order: 1 },
       { name: 'JavaScript', category: 'language', proficiency: 5, order: 2 },
-      { name: 'Rails', category: 'framework', proficiency: 5, order: 1 }
-    ]
+      { name: 'Rails', category: 'framework', proficiency: 5, order: 1 },
+    ],
   });
 }
 
@@ -939,10 +938,12 @@ Response: {
 const ws = new WebSocket('wss://api.example.com/ws');
 
 ws.onopen = () => {
-  ws.send(JSON.stringify({
-    type: 'auth',
-    sessionId: 'session-123'
-  }));
+  ws.send(
+    JSON.stringify({
+      type: 'auth',
+      sessionId: 'session-123',
+    })
+  );
 };
 ```
 
@@ -976,11 +977,11 @@ Authorization: Bearer <token>
 
 ### 5.4 Rate Limiting
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| Chat | 20 requests | 10 minutes |
-| Proposals | 5 requests | 1 hour |
-| Estimates | 10 requests | 1 hour |
+| Endpoint    | Limit        | Window     |
+| ----------- | ------------ | ---------- |
+| Chat        | 20 requests  | 10 minutes |
+| Proposals   | 5 requests   | 1 hour     |
+| Estimates   | 10 requests  | 1 hour     |
 | General API | 100 requests | 15 minutes |
 
 ### 5.5 Error Handling
@@ -1081,7 +1082,7 @@ export function useProjects(filters) {
     queryKey: ['projects', filters],
     queryFn: () => api.getProjects(filters),
     staleTime: 30 * 60 * 1000, // 30 minutes
-    cacheTime: 60 * 60 * 1000 // 1 hour
+    cacheTime: 60 * 60 * 1000, // 1 hour
   });
 }
 ```
@@ -1170,10 +1171,10 @@ const CostEstimator = lazy(() => import('./widgets/CostEstimator'));
 
 ```typescript
 // Default styles for mobile
-className="p-4 text-sm"
+className = 'p-4 text-sm';
 
 // Override for larger screens
-className="p-4 text-sm md:p-8 md:text-base lg:p-12 lg:text-lg"
+className = 'p-4 text-sm md:p-8 md:text-base lg:p-12 lg:text-lg';
 ```
 
 ---
@@ -1415,12 +1416,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
   api:
     build:
@@ -1430,7 +1431,7 @@ services:
       DATABASE_URL: postgresql://user:password@postgres:5432/portfolio
       REDIS_URL: redis://redis:6379
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       - postgres
       - redis
@@ -1440,7 +1441,7 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
     ports:
-      - "80:80"
+      - '80:80'
     depends_on:
       - api
 
@@ -1654,10 +1655,10 @@ app.get('/api/health', async (req, res) => {
     database: await checkDatabase(),
     redis: await checkRedis(),
     ai: await checkAIService(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
-  const healthy = Object.values(checks).every(c => c === true);
+  const healthy = Object.values(checks).every((c) => c === true);
   res.status(healthy ? 200 : 503).json(checks);
 });
 ```
@@ -1794,4 +1795,4 @@ npm run deploy
 
 ---
 
-*This documentation is a living document and will be updated as the project evolves.*
+_This documentation is a living document and will be updated as the project evolves._

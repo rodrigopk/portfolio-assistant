@@ -1,13 +1,13 @@
-import express, { Application } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import compression from 'compression';
+import cors from 'cors';
+import express, { Application } from 'express';
+import helmet from 'helmet';
 import morgan from 'morgan';
 
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
-import { requestLogger } from './middleware/requestLogger';
 import { rateLimiter } from './middleware/rateLimiter';
+import { requestLogger } from './middleware/requestLogger';
 import router from './routes';
 import { logger } from './utils/logger';
 
@@ -17,7 +17,7 @@ const app: Application = express();
 app.use(helmet());
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || ['http://localhost:3000'];
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 // Request logging
-if (process.env.NODE_ENV === 'development') {
+if (process.env['NODE_ENV'] === 'development') {
   app.use(morgan('dev'));
 }
 app.use(requestLogger);

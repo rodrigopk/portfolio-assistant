@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-const logLevel = process.env.LOG_LEVEL || 'info';
+const logLevel = process.env['LOG_LEVEL'] || 'info';
 
 const logger = winston.createLogger({
   level: logLevel,
@@ -20,14 +20,14 @@ const logger = winston.createLogger({
 });
 
 // If we're not in production, log to the console
-if (process.env.NODE_ENV !== 'production') {
+if (process.env['NODE_ENV'] !== 'production') {
   logger.add(
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.simple(),
         winston.format.printf(
-          (info) => `${info.timestamp as string} ${info.level}: ${info.message as string}`
+          (info) => `${info['timestamp'] as string} ${info.level}: ${info.message as string}`
         )
       ),
     })
