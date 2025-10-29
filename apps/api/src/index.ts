@@ -1,8 +1,10 @@
+import { Server } from 'http';
+
 import dotenv from 'dotenv';
 
 import app from './app';
-import { logger } from './utils/logger';
 import { connectRedis, disconnectRedis } from './lib/redis';
+import { logger } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -10,7 +12,7 @@ dotenv.config();
 const PORT = process.env['PORT'] || 3001;
 const HOST = process.env['HOST'] || 'localhost';
 
-let server: any;
+let server: Server | null = null;
 
 // Initialize connections and start server
 async function startServer(): Promise<void> {

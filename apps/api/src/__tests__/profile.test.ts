@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import request from 'supertest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 import app from '../app';
-import { connectRedis, disconnectRedis, cache } from '../lib/redis';
 import { prisma } from '../lib/prisma';
+import { connectRedis, disconnectRedis, cache } from '../lib/redis';
 import { ProfileService } from '../services/profile.service';
 
 // Mock data
@@ -52,7 +53,7 @@ describe('Profile API - Unit Tests', () => {
       vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
       // Mock database response
-      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile as any);
+      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
 
       const result = await profileService.getProfile();
 
@@ -65,7 +66,7 @@ describe('Profile API - Unit Tests', () => {
     it('should return profile from cache when available', async () => {
       // Mock cache hit
       vi.spyOn(cache, 'get').mockResolvedValue(expectedResponse);
-      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(null as any);
+      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(null);
 
       const result = await profileService.getProfile();
 
@@ -77,7 +78,7 @@ describe('Profile API - Unit Tests', () => {
     it('should return null when no profile exists in database', async () => {
       // Mock cache miss and no profile in DB
       vi.spyOn(cache, 'get').mockResolvedValue(null);
-      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(null as any);
+      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(null);
 
       const result = await profileService.getProfile();
 
@@ -89,7 +90,7 @@ describe('Profile API - Unit Tests', () => {
     it('should exclude sensitive fields from response', async () => {
       vi.spyOn(cache, 'get').mockResolvedValue(null);
       vi.spyOn(cache, 'set').mockResolvedValue(undefined);
-      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile as any);
+      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
 
       const result = await profileService.getProfile();
 

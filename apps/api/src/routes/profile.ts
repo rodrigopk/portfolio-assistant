@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
 import { profileController } from '../controllers/profile.controller';
-import { asyncHandler } from '../utils/asyncHandler';
 import { rateLimiter } from '../middleware/rateLimiter';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 

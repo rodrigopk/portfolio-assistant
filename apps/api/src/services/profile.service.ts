@@ -1,7 +1,7 @@
-import { cache } from '../lib/redis';
 import { prisma } from '../lib/prisma';
-import { logger } from '../utils/logger';
+import { cache } from '../lib/redis';
 import { ProfileResponse } from '../types/profile.types';
+import { logger } from '../utils/logger';
 
 const PROFILE_CACHE_KEY = 'profile:main';
 const CACHE_TTL_SECONDS = 60 * 60; // 60 minutes as per TECHNICAL_DOCUMENTATION.md Section 5.1.1

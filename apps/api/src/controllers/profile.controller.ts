@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 
-import { profileService } from '../services/profile.service';
 import { createNotFoundError } from '../middleware/errorHandler';
-import { logger } from '../utils/logger';
+import { profileService } from '../services/profile.service';
 import { ApiResponse } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * Profile Controller
