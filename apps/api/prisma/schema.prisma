@@ -1,0 +1,31 @@
+// Prisma schema for DevPortfolio AI
+// Based on TECHNICAL_DOCUMENTATION.md Section 4.2
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Profile {
+  id              String   @id @default(cuid())
+  fullName        String
+  title           String
+  email           String   @unique
+  phone           String?
+  location        String
+  bio             String
+  shortBio        String
+  yearsExperience Int
+  githubUrl       String?
+  linkedinUrl     String?
+  twitterUrl      String?
+  availability    String   // "available", "limited", "unavailable"
+  hourlyRate      Decimal?
+  resumeUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
