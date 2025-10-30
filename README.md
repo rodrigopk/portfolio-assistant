@@ -16,6 +16,7 @@ DevPortfolio AI is a next-generation portfolio platform for Rodrigo Vasconcelos 
 ## Technology Stack
 
 ### Backend
+
 - **Node.js 20+** - Runtime environment
 - **Express.js** - Web framework
 - **TypeScript** - Type-safe development
@@ -26,6 +27,7 @@ DevPortfolio AI is a next-generation portfolio platform for Rodrigo Vasconcelos 
 - **Bull** - Job queue for background tasks
 
 ### Frontend (Coming Soon)
+
 - **React 18+** - UI framework
 - **TypeScript** - Type safety
 - **TailwindCSS** - Styling
@@ -33,6 +35,7 @@ DevPortfolio AI is a next-generation portfolio platform for Rodrigo Vasconcelos 
 - **Framer Motion** - Animations
 
 ### Infrastructure
+
 - **Docker** - Containerization
 - **Turborepo** - Monorepo build system
 - **GitHub Actions** - CI/CD pipelines
@@ -71,34 +74,40 @@ portfolio-assistant/
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/rodrigopk/portfolio-assistant.git
 cd portfolio-assistant
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Set up environment variables**
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 4. **Start development services with Docker** (optional)
+
 ```bash
 docker-compose up -d
 ```
 
 5. **Run database migrations** (coming soon)
+
 ```bash
 npm run db:migrate
 npm run db:seed
 ```
 
 6. **Start development servers**
+
 ```bash
 npm run dev
 ```
@@ -108,6 +117,7 @@ The API will be available at `http://localhost:3001`
 ## Available Scripts
 
 ### Root Level
+
 - `npm run dev` - Start all applications in development mode
 - `npm run build` - Build all applications
 - `npm test` - Run tests across all packages
@@ -116,6 +126,7 @@ The API will be available at `http://localhost:3001`
 - `npm run clean` - Clean all build artifacts
 
 ### API Specific
+
 ```bash
 cd apps/api
 npm run dev          # Start API dev server
@@ -127,6 +138,7 @@ npm run lint         # Lint API code
 ## Development Workflow
 
 1. **Create a feature branch**
+
 ```bash
 git checkout -b feature/my-feature
 ```
@@ -137,6 +149,7 @@ git checkout -b feature/my-feature
    - Update documentation as needed
 
 3. **Run quality checks**
+
 ```bash
 npm run lint          # Check for linting errors
 npm run format:check  # Check code formatting
@@ -144,17 +157,20 @@ npm test              # Run all tests
 ```
 
 4. **Commit your changes**
+
 ```bash
 git add .
 git commit -m "feat: add my new feature"
 ```
 
 Git hooks will automatically:
+
 - Run ESLint on staged files
 - Format code with Prettier
 - Validate commit message format
 
 5. **Push and create a pull request**
+
 ```bash
 git push origin feature/my-feature
 ```
@@ -190,6 +206,7 @@ JWT_SECRET=your_jwt_secret
 ## Features Roadmap
 
 ### ✅ Phase 1: Foundation (Current)
+
 - [x] Project structure setup
 - [x] Backend API with Express and TypeScript
 - [x] Development tooling (ESLint, Prettier, Husky)
@@ -197,6 +214,7 @@ JWT_SECRET=your_jwt_secret
 - [x] Health check endpoints
 
 ### 🚧 Phase 2: Core Backend (In Progress)
+
 - [ ] Database schema with Prisma
 - [ ] Authentication system
 - [ ] Profile and projects endpoints
@@ -204,6 +222,7 @@ JWT_SECRET=your_jwt_secret
 - [ ] Caching layer with Redis
 
 ### 📋 Phase 3: AI Integration
+
 - [ ] Mastra AI agent setup
 - [ ] Chat agent implementation
 - [ ] RAG system for context retrieval
@@ -211,6 +230,7 @@ JWT_SECRET=your_jwt_secret
 - [ ] Cost estimator agent
 
 ### 📋 Phase 4: Frontend
+
 - [ ] React application setup
 - [ ] Component library
 - [ ] Chat widget
@@ -218,6 +238,7 @@ JWT_SECRET=your_jwt_secret
 - [ ] Blog interface
 
 ### 📋 Phase 5: Advanced Features
+
 - [ ] WebSocket real-time chat
 - [ ] Background job processing
 - [ ] Email notifications
@@ -227,11 +248,13 @@ JWT_SECRET=your_jwt_secret
 ## Testing
 
 Run tests with coverage:
+
 ```bash
 npm test -- --coverage
 ```
 
 Run tests in watch mode:
+
 ```bash
 npm test -- --watch
 ```
@@ -241,6 +264,7 @@ npm test -- --watch
 See [Deployment Guide](docs/TECHNICAL_DOCUMENTATION.md#8-deployment-guide) for detailed deployment instructions.
 
 Quick deploy with Docker:
+
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
@@ -272,6 +296,7 @@ MIT License - see LICENSE file for details
 ## Contact
 
 **Rodrigo Vasconcelos de Barros**
+
 - GitHub: [@rodrigopk](https://github.com/rodrigopk)
 - Email: rodrigo@example.com
 

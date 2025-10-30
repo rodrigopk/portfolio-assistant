@@ -10,9 +10,7 @@ export function Projects() {
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Sample Project 1
-          </h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 1</h3>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             A full-stack web application built with React and Node.js.
           </p>
@@ -27,9 +25,7 @@ export function Projects() {
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Sample Project 2
-          </h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 2</h3>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             An e-commerce platform with advanced features.
           </p>
@@ -44,9 +40,7 @@ export function Projects() {
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Sample Project 3
-          </h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 3</h3>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             A mobile-responsive web application for task management.
           </p>

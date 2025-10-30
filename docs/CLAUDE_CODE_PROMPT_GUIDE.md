@@ -23,6 +23,7 @@ This guide provides example prompts for using Claude Code to implement features 
 Claude Code will automatically have access to `TECHNICAL_DOCUMENTATION.md` in your repository. Reference it explicitly in your prompts:
 
 **Good Prompt Structure:**
+
 ```
 According to TECHNICAL_DOCUMENTATION.md section [X.X], please implement [feature].
 

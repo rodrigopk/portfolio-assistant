@@ -12,9 +12,7 @@ export function About() {
           web technologies. I'm passionate about building scalable applications and solving complex
           technical challenges.
         </p>
-        <p>
-          Languages: English (professional), Portuguese (native), German (elementary)
-        </p>
+        <p>Languages: English (professional), Portuguese (native), German (elementary)</p>
       </div>
     </div>
   );

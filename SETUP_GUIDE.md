@@ -13,6 +13,7 @@ Before you begin, ensure you have the following installed:
 - **Git** - [Download here](https://git-scm.com/)
 
 Optionally:
+
 - **Docker & Docker Compose** - For containerized development
 
 ## Quick Start
@@ -26,6 +27,7 @@ Run the setup script:
 ```
 
 This will:
+
 - ✅ Verify Node.js and npm versions
 - ✅ Create .env file from template
 - ✅ Install all dependencies
@@ -90,14 +92,14 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
 volumes:
   postgres_data:
@@ -117,6 +119,7 @@ docker-compose up -d
    - Windows: Download from postgresql.org
 
 2. **Create Database**
+
 ```bash
 psql -U postgres
 CREATE DATABASE portfolio;
@@ -131,6 +134,7 @@ GRANT ALL PRIVILEGES ON DATABASE portfolio TO user;
    - Windows: Use WSL or download from redis.io
 
 4. **Verify Redis is running**
+
 ```bash
 redis-cli ping
 # Should return: PONG
@@ -157,6 +161,7 @@ curl http://localhost:3001/api/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -228,6 +233,7 @@ PORT=3002
 ### Database Connection Issues
 
 1. Verify PostgreSQL is running:
+
 ```bash
 # macOS/Linux
 pg_isready
@@ -240,6 +246,7 @@ brew services list | grep postgres  # macOS
 2. Check your DATABASE_URL in `.env` matches your PostgreSQL configuration
 
 3. Test the connection:
+
 ```bash
 psql postgresql://user:password@localhost:5432/portfolio
 ```
@@ -247,11 +254,13 @@ psql postgresql://user:password@localhost:5432/portfolio
 ### Redis Connection Issues
 
 1. Verify Redis is running:
+
 ```bash
 redis-cli ping
 ```
 
 2. If not running:
+
 ```bash
 # macOS
 brew services start redis
@@ -265,17 +274,20 @@ sudo systemctl start redis
 If you see TypeScript errors:
 
 1. Clear build cache:
+
 ```bash
 npm run clean
 ```
 
 2. Reinstall dependencies:
+
 ```bash
 rm -rf node_modules package-lock.json
 npm install
 ```
 
 3. Rebuild:
+
 ```bash
 npm run build
 ```
@@ -285,11 +297,13 @@ npm run build
 If Git hooks are failing:
 
 1. Reinstall Husky:
+
 ```bash
 npm run prepare
 ```
 
 2. Make hooks executable:
+
 ```bash
 chmod +x .husky/pre-commit
 ```
@@ -299,6 +313,7 @@ chmod +x .husky/pre-commit
 ### VS Code (Recommended)
 
 Install recommended extensions:
+
 - ESLint
 - Prettier
 - TypeScript and JavaScript Language Features

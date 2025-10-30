@@ -47,6 +47,7 @@ Successfully implemented project endpoints per section 5.1.2 of TECHNICAL_DOCUME
 ### Query Parameters Supported
 
 **GET /api/projects:**
+
 - `featured=true|false` - Filter by featured flag
 - `category=web|mobile|backend` - Filter by category
 - `tech=React,TypeScript` - Filter by technologies (comma-separated)
@@ -56,6 +57,7 @@ Successfully implemented project endpoints per section 5.1.2 of TECHNICAL_DOCUME
 ### Response Schemas
 
 **GET /api/projects:**
+
 ```json
 {
   "data": [
@@ -84,6 +86,7 @@ Successfully implemented project endpoints per section 5.1.2 of TECHNICAL_DOCUME
 ```
 
 **GET /api/projects/:slug:**
+
 ```json
 {
   "data": {
@@ -129,27 +132,32 @@ Successfully implemented project endpoints per section 5.1.2 of TECHNICAL_DOCUME
 Due to network restrictions in the current environment preventing Prisma engine downloads, the following steps need to be completed in an environment with proper network access:
 
 1. **Install Dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Generate Prisma Client:**
+
    ```bash
    cd apps/api
    npx prisma generate
    ```
 
 3. **Run Database Migration:**
+
    ```bash
    npx prisma migrate dev --name add_project_model
    ```
 
 4. **Build the Application:**
+
    ```bash
    npm run build
    ```
 
 5. **Run Tests:**
+
    ```bash
    npm run test
    ```
@@ -164,41 +172,49 @@ Due to network restrictions in the current environment preventing Prisma engine 
 Once the application is running, test the endpoints:
 
 #### 1. Get All Projects
+
 ```bash
 curl http://localhost:3001/api/projects
 ```
 
 #### 2. Get Featured Projects Only
+
 ```bash
 curl http://localhost:3001/api/projects?featured=true
 ```
 
 #### 3. Filter by Category
+
 ```bash
 curl http://localhost:3001/api/projects?category=web
 ```
 
 #### 4. Filter by Technologies
+
 ```bash
 curl http://localhost:3001/api/projects?tech=React,TypeScript
 ```
 
 #### 5. Pagination
+
 ```bash
 curl http://localhost:3001/api/projects?limit=5&offset=0
 ```
 
 #### 6. Combined Filters
+
 ```bash
 curl http://localhost:3001/api/projects?featured=true&category=web&tech=React&limit=10
 ```
 
 #### 7. Get Project by Slug
+
 ```bash
 curl http://localhost:3001/api/projects/your-project-slug
 ```
 
 #### 8. Test 404 Error
+
 ```bash
 curl http://localhost:3001/api/projects/non-existent-project
 ```
@@ -235,24 +251,28 @@ INSERT INTO "Project" (
 ## Code Quality
 
 ### Architecture
+
 - Follows clean architecture pattern
 - Separation of concerns (routes → controllers → services)
 - Dependency injection via singleton instances
 - Centralized error handling
 
 ### Caching Strategy
+
 - Redis server-side caching (30 min TTL)
 - Client-side cache headers (Cache-Control, ETag)
 - Cache key generation based on query parameters
 - Cache invalidation methods for updates
 
 ### Type Safety
+
 - Full TypeScript implementation
 - Zod runtime validation
 - Proper error types
 - Prisma type safety
 
 ### Testing
+
 - Unit tests for service layer
 - Integration tests for endpoints
 - Mock data for consistent testing

@@ -23,8 +23,8 @@ async function main() {
       linkedinUrl: 'https://linkedin.com/in/rodrigo-vasconcelos',
       twitterUrl: 'https://twitter.com/rodrigopk',
       availability: 'limited',
-      hourlyRate: 120.00,
-      resumeUrl: 'https://example.com/resume/rodrigo-vasconcelos.pdf'
+      hourlyRate: 120.0,
+      resumeUrl: 'https://example.com/resume/rodrigo-vasconcelos.pdf',
     },
   });
 
@@ -36,7 +36,8 @@ async function main() {
       title: 'E-commerce Platform',
       slug: 'ecommerce-platform',
       description: 'A full-stack e-commerce platform with payment integration',
-      longDescription: 'A comprehensive e-commerce solution built with React and Node.js. Features include user authentication, product catalog, shopping cart, payment processing with Stripe, order management, and admin dashboard. The platform supports multiple payment methods and provides real-time inventory tracking.',
+      longDescription:
+        'A comprehensive e-commerce solution built with React and Node.js. Features include user authentication, product catalog, shopping cart, payment processing with Stripe, order management, and admin dashboard. The platform supports multiple payment methods and provides real-time inventory tracking.',
       technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe', 'TypeScript', 'Express'],
       featured: true,
       category: 'web',
@@ -54,7 +55,8 @@ async function main() {
       title: 'Task Management Mobile App',
       slug: 'task-management-mobile',
       description: 'Cross-platform mobile app for team task management',
-      longDescription: 'A React Native mobile application for team collaboration and task management. Features include real-time synchronization, push notifications, offline support, file attachments, and team chat functionality. The app integrates with popular project management tools and supports both iOS and Android platforms.',
+      longDescription:
+        'A React Native mobile application for team collaboration and task management. Features include real-time synchronization, push notifications, offline support, file attachments, and team chat functionality. The app integrates with popular project management tools and supports both iOS and Android platforms.',
       technologies: ['React Native', 'Firebase', 'TypeScript', 'Redux', 'Expo'],
       featured: true,
       category: 'mobile',
@@ -72,7 +74,8 @@ async function main() {
       title: 'AI-Powered Analytics Dashboard',
       slug: 'ai-analytics-dashboard',
       description: 'Business intelligence dashboard with machine learning insights',
-      longDescription: 'An advanced analytics dashboard that leverages AI and machine learning to provide business insights. Built with Python backend and React frontend, it processes large datasets, generates predictive analytics, and provides interactive visualizations. Features include automated report generation, anomaly detection, and custom KPI tracking.',
+      longDescription:
+        'An advanced analytics dashboard that leverages AI and machine learning to provide business insights. Built with Python backend and React frontend, it processes large datasets, generates predictive analytics, and provides interactive visualizations. Features include automated report generation, anomaly detection, and custom KPI tracking.',
       technologies: ['Python', 'React', 'TensorFlow', 'PostgreSQL', 'Docker', 'FastAPI'],
       featured: true,
       category: 'web',
@@ -90,7 +93,8 @@ async function main() {
       title: 'Cryptocurrency Trading Bot',
       slug: 'crypto-trading-bot',
       description: 'Automated trading bot for cryptocurrency markets',
-      longDescription: 'A sophisticated trading bot that uses algorithmic trading strategies to automatically trade cryptocurrencies. Built with Node.js and integrates with multiple exchange APIs. Features include backtesting, risk management, real-time market analysis, and comprehensive logging. Supports multiple trading strategies and custom indicators.',
+      longDescription:
+        'A sophisticated trading bot that uses algorithmic trading strategies to automatically trade cryptocurrencies. Built with Node.js and integrates with multiple exchange APIs. Features include backtesting, risk management, real-time market analysis, and comprehensive logging. Supports multiple trading strategies and custom indicators.',
       technologies: ['Node.js', 'JavaScript', 'MongoDB', 'WebSocket', 'REST APIs'],
       featured: false,
       category: 'backend',
@@ -108,7 +112,8 @@ async function main() {
       title: 'Social Media Aggregator',
       slug: 'social-media-aggregator',
       description: 'Unified dashboard for managing multiple social media accounts',
-      longDescription: 'A comprehensive social media management tool that aggregates content from multiple platforms. Built with Ruby on Rails backend and Vue.js frontend. Features include scheduled posting, analytics tracking, content curation, team collaboration, and engagement monitoring across Facebook, Twitter, Instagram, and LinkedIn.',
+      longDescription:
+        'A comprehensive social media management tool that aggregates content from multiple platforms. Built with Ruby on Rails backend and Vue.js frontend. Features include scheduled posting, analytics tracking, content curation, team collaboration, and engagement monitoring across Facebook, Twitter, Instagram, and LinkedIn.',
       technologies: ['Ruby on Rails', 'Vue.js', 'Redis', 'PostgreSQL', 'Sidekiq'],
       featured: false,
       category: 'web',
@@ -126,7 +131,8 @@ async function main() {
       title: 'Fitness Tracking PWA',
       slug: 'fitness-tracking-pwa',
       description: 'Progressive web app for personal fitness tracking',
-      longDescription: 'A progressive web application for tracking personal fitness goals, workouts, and nutrition. Built with Angular and implements service workers for offline functionality. Features include workout planning, progress tracking, nutrition logging, social sharing, and integration with wearable devices.',
+      longDescription:
+        'A progressive web application for tracking personal fitness goals, workouts, and nutrition. Built with Angular and implements service workers for offline functionality. Features include workout planning, progress tracking, nutrition logging, social sharing, and integration with wearable devices.',
       technologies: ['Angular', 'TypeScript', 'Service Workers', 'IndexedDB', 'Chart.js'],
       featured: false,
       category: 'web',
@@ -144,7 +150,8 @@ async function main() {
       title: 'IoT Home Automation',
       slug: 'iot-home-automation',
       description: 'Smart home automation system with IoT device integration',
-      longDescription: 'A complete home automation solution that integrates various IoT devices for smart home control. Built with Python backend and React frontend, it supports device discovery, automation rules, voice control integration, and mobile app control. Compatible with popular smart home protocols like Zigbee and Z-Wave.',
+      longDescription:
+        'A complete home automation solution that integrates various IoT devices for smart home control. Built with Python backend and React frontend, it supports device discovery, automation rules, voice control integration, and mobile app control. Compatible with popular smart home protocols like Zigbee and Z-Wave.',
       technologies: ['Python', 'React', 'MQTT', 'SQLite', 'Raspberry Pi', 'Docker'],
       featured: true,
       category: 'iot',
@@ -162,7 +169,8 @@ async function main() {
       title: 'Video Streaming Platform',
       slug: 'video-streaming-platform',
       description: 'Netflix-like video streaming service with CDN integration',
-      longDescription: 'A scalable video streaming platform similar to Netflix, built with microservices architecture. Features include video encoding, adaptive bitrate streaming, content management, user subscriptions, recommendation engine, and global CDN integration. Supports multiple video formats and resolutions.',
+      longDescription:
+        'A scalable video streaming platform similar to Netflix, built with microservices architecture. Features include video encoding, adaptive bitrate streaming, content management, user subscriptions, recommendation engine, and global CDN integration. Supports multiple video formats and resolutions.',
       technologies: ['Go', 'React', 'FFmpeg', 'Kubernetes', 'Redis', 'PostgreSQL'],
       featured: false,
       category: 'web',
@@ -180,7 +188,8 @@ async function main() {
       title: 'Blockchain Voting System',
       slug: 'blockchain-voting-system',
       description: 'Secure voting system built on blockchain technology',
-      longDescription: 'A transparent and secure voting system leveraging blockchain technology to ensure vote integrity and transparency. Built with Solidity smart contracts and Web3 frontend. Features include voter authentication, anonymous voting, real-time results, and immutable vote records.',
+      longDescription:
+        'A transparent and secure voting system leveraging blockchain technology to ensure vote integrity and transparency. Built with Solidity smart contracts and Web3 frontend. Features include voter authentication, anonymous voting, real-time results, and immutable vote records.',
       technologies: ['Solidity', 'Web3.js', 'Ethereum', 'React', 'Truffle', 'MetaMask'],
       featured: false,
       category: 'blockchain',
@@ -198,7 +207,8 @@ async function main() {
       title: 'Weather Forecast API',
       slug: 'weather-forecast-api',
       description: 'RESTful API service for weather data and forecasting',
-      longDescription: 'A comprehensive weather API service that aggregates data from multiple weather sources and provides accurate forecasts. Built with Node.js and Express, it features rate limiting, caching, historical weather data, and supports multiple data formats. Includes detailed documentation and SDK for easy integration.',
+      longDescription:
+        'A comprehensive weather API service that aggregates data from multiple weather sources and provides accurate forecasts. Built with Node.js and Express, it features rate limiting, caching, historical weather data, and supports multiple data formats. Includes detailed documentation and SDK for easy integration.',
       technologies: ['Node.js', 'Express', 'MongoDB', 'Redis', 'Docker', 'Swagger'],
       featured: false,
       category: 'backend',
@@ -216,7 +226,8 @@ async function main() {
       title: 'Language Learning Game',
       slug: 'language-learning-game',
       description: 'Gamified mobile app for learning foreign languages',
-      longDescription: 'An engaging mobile game that makes language learning fun and interactive. Built with Flutter for cross-platform compatibility. Features include adaptive learning algorithms, speech recognition, progress tracking, multiplayer challenges, and offline mode. Supports multiple languages with native speaker audio.',
+      longDescription:
+        'An engaging mobile game that makes language learning fun and interactive. Built with Flutter for cross-platform compatibility. Features include adaptive learning algorithms, speech recognition, progress tracking, multiplayer challenges, and offline mode. Supports multiple languages with native speaker audio.',
       technologies: ['Flutter', 'Dart', 'Firebase', 'TensorFlow Lite', 'SQLite'],
       featured: true,
       category: 'mobile',
@@ -234,7 +245,8 @@ async function main() {
       title: 'DevOps Monitoring Suite',
       slug: 'devops-monitoring-suite',
       description: 'Comprehensive monitoring and alerting system for DevOps teams',
-      longDescription: 'A complete monitoring solution for DevOps teams featuring infrastructure monitoring, application performance tracking, log aggregation, and intelligent alerting. Built with Go backend and React dashboard. Integrates with popular tools like Prometheus, Grafana, and Kubernetes.',
+      longDescription:
+        'A complete monitoring solution for DevOps teams featuring infrastructure monitoring, application performance tracking, log aggregation, and intelligent alerting. Built with Go backend and React dashboard. Integrates with popular tools like Prometheus, Grafana, and Kubernetes.',
       technologies: ['Go', 'React', 'Prometheus', 'Grafana', 'Docker', 'Kubernetes'],
       featured: false,
       category: 'devops',
@@ -247,7 +259,7 @@ async function main() {
       githubForks: 31,
       lastCommit: new Date('2023-11-28'),
       order: 10,
-    }
+    },
   ];
 
   console.log('Creating projects...');
@@ -263,9 +275,12 @@ async function main() {
   console.log('\nSeed data created successfully!');
   console.log(`- 1 Profile created`);
   console.log(`- ${projects.length} Projects created`);
-  console.log('\nProject categories:', [...new Set(projects.map(p => p.category))].join(', '));
-  console.log('Featured projects:', projects.filter(p => p.featured).length);
-  console.log('Technologies covered:', [...new Set(projects.flatMap(p => p.technologies))].sort().join(', '));
+  console.log('\nProject categories:', [...new Set(projects.map((p) => p.category))].join(', '));
+  console.log('Featured projects:', projects.filter((p) => p.featured).length);
+  console.log(
+    'Technologies covered:',
+    [...new Set(projects.flatMap((p) => p.technologies))].sort().join(', ')
+  );
 }
 
 main()
