@@ -7,6 +7,8 @@ import { logger } from '../utils/logger';
 export class SessionManager {
   private sessions: Map<string, WebSocket>;
   private rateLimitConfig: RateLimitConfig;
+  private lastRedisWarningTime: number = 0;
+  private readonly REDIS_WARNING_THROTTLE_MS = 60000; // Log warning once per minute
 
   constructor(rateLimitConfig: RateLimitConfig = DEFAULT_RATE_LIMIT) {
     this.sessions = new Map();
@@ -186,14 +188,26 @@ export class SessionManager {
   }
 
   /**
+   * Log Redis unavailability warning with rate limiting to prevent log noise
+   */
+  private logRedisUnavailableWarning(): void {
+    const now = Date.now();
+    if (now - this.lastRedisWarningTime >= this.REDIS_WARNING_THROTTLE_MS) {
+      logger.warn(
+        'Redis is not connected. WebSocket session data will not be persisted. This message is rate-limited to once per minute.'
+      );
+      this.lastRedisWarningTime = now;
+    }
+  }
+
+  /**
    * Store session data in Redis
    */
   private async setSessionData(sessionId: string, data: SessionData): Promise<void> {
     // Check if Redis is connected before attempting operation
     if (!redisClient.isOpen) {
-      logger.warn(
-        `Redis is not connected. Unable to store session data for ${sessionId}. WebSocket will continue without persistent session data.`
-      );
+      this.logRedisUnavailableWarning();
+      logger.debug(`Unable to store session data for ${sessionId} - Redis not connected`);
       return;
     }
 
@@ -204,7 +218,7 @@ export class SessionManager {
     } catch (error) {
       logger.error(`Failed to set session data for ${sessionId}:`, error);
       // Don't throw - allow WebSocket functionality to continue without Redis
-      logger.warn('WebSocket will continue without persistent session data');
+      this.logRedisUnavailableWarning();
     }
   }
 
