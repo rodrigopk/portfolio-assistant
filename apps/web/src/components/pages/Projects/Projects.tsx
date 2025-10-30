@@ -1,57 +1,153 @@
+import { useState, useMemo } from 'react';
+import { ProjectGrid } from '../../ProjectGrid';
+import { ProjectFilters } from '../../ProjectFilters';
+import { useProjects } from '../../../hooks/useProjects';
+import type { ProjectsQueryParams } from '../../../types/project';
+
+const ITEMS_PER_PAGE = 9;
+
 export function Projects() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<ProjectsQueryParams>({});
+
+  // Calculate offset for pagination
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  // Fetch projects with current filters and pagination
+  const { data, isLoading, isError, error } = useProjects({
+    ...filters,
+    limit: ITEMS_PER_PAGE,
+    offset,
+  });
+
+  // Fetch all projects without filters to get unique categories and technologies
+  const { data: allProjectsData } = useProjects({ limit: 1000 });
+
+  // Extract unique categories and technologies for filters
+  const { categories, technologies } = useMemo(() => {
+    if (!allProjectsData?.projects) {
+      return { categories: [], technologies: [] };
+    }
+
+    const categoriesSet = new Set<string>();
+    const technologiesSet = new Set<string>();
+
+    allProjectsData.projects.forEach((project) => {
+      if (project.category) {
+        categoriesSet.add(project.category);
+      }
+      project.technologies.forEach((tech) => technologiesSet.add(tech));
+    });
+
+    return {
+      categories: Array.from(categoriesSet).sort(),
+      technologies: Array.from(technologiesSet).sort(),
+    };
+  }, [allProjectsData]);
+
+  // Calculate total pages
+  const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 1;
+
+  // Handle filter changes
+  const handleFilterChange = (newFilters: {
+    featured?: boolean;
+    category?: string;
+    tech?: string[];
+  }) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of the page for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Projects</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          Projects
+        </h1>
+        <p className="mt-2 text-base text-gray-600 dark:text-gray-300 sm:text-lg">
           Explore my portfolio of web applications and open-source contributions.
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 1</h3>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            A full-stack web application built with React and Node.js.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-              React
-            </span>
-            <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800 dark:bg-green-900 dark:text-green-300">
-              Node.js
-            </span>
+      {/* Error State */}
+      {isError && (
+        <div
+          className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="flex">
+            <svg
+              className="h-5 w-5 text-red-600 dark:text-red-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
+                Error loading projects
+              </h3>
+              <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+                {error instanceof Error ? error.message : 'An unexpected error occurred'}
+              </p>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 2</h3>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            An e-commerce platform with advanced features.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-purple-100 px-3 py-1 text-sm text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-              Ruby on Rails
-            </span>
-            <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-              PostgreSQL
-            </span>
-          </div>
+      {/* Main Content */}
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Filters Sidebar - Hidden on mobile, visible on desktop */}
+        <aside className="hidden lg:block" aria-label="Project filters">
+          <ProjectFilters
+            onFilterChange={handleFilterChange}
+            categories={categories}
+            technologies={technologies}
+          />
+        </aside>
+
+        {/* Mobile Filters - Visible on mobile, hidden on desktop */}
+        <div className="lg:hidden">
+          <details className="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <summary className="cursor-pointer p-4 text-lg font-semibold text-gray-900 dark:text-white">
+              Filters
+            </summary>
+            <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+              <ProjectFilters
+                onFilterChange={handleFilterChange}
+                categories={categories}
+                technologies={technologies}
+              />
+            </div>
+          </details>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Sample Project 3</h3>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            A mobile-responsive web application for task management.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-              TypeScript
-            </span>
-            <span className="rounded-full bg-pink-100 px-3 py-1 text-sm text-pink-800 dark:bg-pink-900 dark:text-pink-300">
-              TailwindCSS
-            </span>
-          </div>
+        {/* Projects Grid */}
+        <div className="lg:col-span-3">
+          {!isError && (
+            <ProjectGrid
+              projects={data?.projects || []}
+              isLoading={isLoading}
+              hasMore={data?.hasMore}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              totalPages={totalPages}
+            />
+          )}
         </div>
       </div>
     </div>
