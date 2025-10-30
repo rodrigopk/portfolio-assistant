@@ -138,7 +138,7 @@ export function ProjectFilters({ onFilterChange, categories, technologies }: Pro
             Active filters:{' '}
             {[
               featuredOnly && 'Featured',
-              selectedCategory && selectedCategory,
+              selectedCategory,
               ...selectedTech.map((t) => t),
             ]
               .filter(Boolean)
