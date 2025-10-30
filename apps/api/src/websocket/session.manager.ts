@@ -1,11 +1,7 @@
 import { WebSocket } from 'ws';
 
 import { redisClient } from '../lib/redis';
-import {
-  DEFAULT_RATE_LIMIT,
-  RateLimitConfig,
-  SessionData,
-} from '../types/websocket.types';
+import { DEFAULT_RATE_LIMIT, RateLimitConfig, SessionData } from '../types/websocket.types';
 import { logger } from '../utils/logger';
 
 export class SessionManager {

@@ -247,16 +247,14 @@ describe('WebSocket Chat Handler', () => {
   });
 
   describe('Chat Messages', () => {
-    it(
-      'should handle chat messages and stream response',
-      async () => {
-        await new Promise<void>((resolve, reject) => {
-          const client = new WebSocket(wsUrl);
-          const sessionId = randomUUID();
-          const timeout = setTimeout(() => {
-            client.close();
-            reject(new Error('Test timeout'));
-          }, 10000);
+    it('should handle chat messages and stream response', async () => {
+      await new Promise<void>((resolve, reject) => {
+        const client = new WebSocket(wsUrl);
+        const sessionId = randomUUID();
+        const timeout = setTimeout(() => {
+          client.close();
+          reject(new Error('Test timeout'));
+        }, 10000);
         let authCompleted = false;
         let tokenCount = 0;
 
@@ -315,9 +313,7 @@ describe('WebSocket Chat Handler', () => {
           reject(error);
         });
       });
-    },
-      15000
-    );
+    }, 15000);
   });
 
   describe('Ping/Pong', () => {
@@ -368,16 +364,14 @@ describe('WebSocket Chat Handler', () => {
   });
 
   describe('Rate Limiting', () => {
-    it(
-      'should enforce rate limiting (20 requests per 10 minutes)',
-      async () => {
-        await new Promise<void>((resolve, reject) => {
-          const client = new WebSocket(wsUrl);
-          const sessionId = randomUUID();
-          const timeout = setTimeout(() => {
-            client.close();
-            reject(new Error('Test timeout: rate limit error not received'));
-          }, 20000);
+    it('should enforce rate limiting (20 requests per 10 minutes)', async () => {
+      await new Promise<void>((resolve, reject) => {
+        const client = new WebSocket(wsUrl);
+        const sessionId = randomUUID();
+        const timeout = setTimeout(() => {
+          client.close();
+          reject(new Error('Test timeout: rate limit error not received'));
+        }, 20000);
         let authCompleted = false;
         let messagesSent = 0;
         let rateLimitError = false;
@@ -447,9 +441,7 @@ describe('WebSocket Chat Handler', () => {
           reject(error);
         });
       });
-    },
-      25000
-    );
+    }, 25000);
   });
 
   describe('Error Handling', () => {

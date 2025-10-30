@@ -153,11 +153,7 @@ export class ChatWebSocketHandler {
   /**
    * Handle chat messages
    */
-  private async handleChat(
-    ws: WebSocket,
-    message: ChatMessage,
-    sessionId: string
-  ): Promise<void> {
+  private async handleChat(ws: WebSocket, message: ChatMessage, sessionId: string): Promise<void> {
     try {
       // Check rate limit and increment atomically to prevent race conditions
       const canSend = await this.sessionManager.checkAndIncrementMessage(sessionId);
@@ -189,11 +185,7 @@ export class ChatWebSocketHandler {
   /**
    * Handle typing indicator messages
    */
-  private handleTyping(
-    _ws: WebSocket,
-    message: TypingMessage,
-    sessionId: string
-  ): void {
+  private handleTyping(_ws: WebSocket, message: TypingMessage, sessionId: string): void {
     logger.debug(`Typing indicator from ${sessionId}: ${message.isTyping}`);
     // In a real implementation, this would broadcast to other clients
     // For now, we just log it
@@ -223,10 +215,10 @@ export class ChatWebSocketHandler {
     // Generate mock response based on the message
     const mockResponses = [
       'I understand you need help with your portfolio project. Let me assist you with that.',
-      'That\'s an interesting question. Based on my analysis, I\'d recommend the following approach...',
-      'I can help you implement that feature. Here\'s what I suggest...',
+      "That's an interesting question. Based on my analysis, I'd recommend the following approach...",
+      "I can help you implement that feature. Here's what I suggest...",
       'Great question! Let me break this down for you step by step.',
-      'I\'ve analyzed your request and here\'s my recommendation...',
+      "I've analyzed your request and here's my recommendation...",
     ];
 
     const randomIndex = Math.floor(Math.random() * mockResponses.length);
