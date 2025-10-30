@@ -4,12 +4,11 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { testUtils } from './setup';
 
 /**
- * Test data and helpers
+ * Test data and helpers (currently unused but kept for future mock scenarios)
  */
-const MOCK_PROJECTS_RESPONSE = {
+const _MOCK_PROJECTS_RESPONSE = {
   data: [
     {
       id: '1',
@@ -60,7 +59,7 @@ const MOCK_PROJECTS_RESPONSE = {
   },
 };
 
-const MOCK_FILTERS_RESPONSE = {
+const _MOCK_FILTERS_RESPONSE = {
   data: {
     categories: ['Web Application', 'Productivity', 'Data Visualization'],
     technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Express', 'Vue', 'JavaScript', 'D3.js'],

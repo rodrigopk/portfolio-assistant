@@ -4,7 +4,7 @@
  * Handles test data seeding, cleanup, and environment validation
  */
 
-import type { FullConfig } from '@playwright/test';
+import type { FullConfig, Page, Response, Route } from '@playwright/test';
 
 /**
  * API Configuration
@@ -87,7 +87,7 @@ async function waitForApi(maxAttempts = 30, delayMs = 1000): Promise<boolean> {
         console.log('API is ready!');
         return true;
       }
-    } catch (error) {
+    } catch {
       // API not ready yet
     }
 
@@ -189,15 +189,15 @@ export const testUtils = {
   /**
    * Wait for element with retry
    */
-  async waitForSelector(page: any, selector: string, timeout = 5000): Promise<void> {
+  async waitForSelector(page: Page, selector: string, timeout = 5000): Promise<void> {
     await page.waitForSelector(selector, { timeout });
   },
 
   /**
    * Get API response from network
    */
-  async waitForApiResponse(page: any, urlPattern: string | RegExp): Promise<any> {
-    return page.waitForResponse((response: any) => {
+  async waitForApiResponse(page: Page, urlPattern: string | RegExp): Promise<Response> {
+    return page.waitForResponse((response: Response) => {
       const url = response.url();
       return typeof urlPattern === 'string' ? url.includes(urlPattern) : urlPattern.test(url);
     });
@@ -206,8 +206,12 @@ export const testUtils = {
   /**
    * Mock API response
    */
-  async mockApiResponse(page: any, urlPattern: string | RegExp, responseData: any): Promise<void> {
-    await page.route(urlPattern, (route: any) => {
+  async mockApiResponse(
+    page: Page,
+    urlPattern: string | RegExp,
+    responseData: unknown
+  ): Promise<void> {
+    await page.route(urlPattern, (route: Route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -219,8 +223,8 @@ export const testUtils = {
   /**
    * Mock API error
    */
-  async mockApiError(page: any, urlPattern: string | RegExp, status = 500): Promise<void> {
-    await page.route(urlPattern, (route: any) => {
+  async mockApiError(page: Page, urlPattern: string | RegExp, status = 500): Promise<void> {
+    await page.route(urlPattern, (route: Route) => {
       route.fulfill({
         status,
         contentType: 'application/json',
@@ -237,7 +241,7 @@ export const testUtils = {
   /**
    * Take screenshot with name
    */
-  async screenshot(page: any, name: string): Promise<void> {
+  async screenshot(page: Page, name: string): Promise<void> {
     await page.screenshot({ path: `test-results/screenshots/${name}.png`, fullPage: true });
   },
 };
