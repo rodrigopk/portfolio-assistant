@@ -17,7 +17,7 @@ export function ProjectFilters({ onFilterChange, categories, technologies }: Pro
     onFilterChange({
       category: newCategory || undefined,
       tech: selectedTech.length > 0 ? selectedTech : undefined,
-      featured: featuredOnly,
+      featured: featuredOnly || undefined,
     });
   };
 
@@ -29,7 +29,7 @@ export function ProjectFilters({ onFilterChange, categories, technologies }: Pro
     onFilterChange({
       category: selectedCategory || undefined,
       tech: newTech.length > 0 ? newTech : undefined,
-      featured: featuredOnly,
+      featured: featuredOnly || undefined,
     });
   };
 
@@ -39,7 +39,7 @@ export function ProjectFilters({ onFilterChange, categories, technologies }: Pro
     onFilterChange({
       category: selectedCategory || undefined,
       tech: selectedTech.length > 0 ? selectedTech : undefined,
-      featured: newFeatured,
+      featured: newFeatured || undefined,
     });
   };
 

@@ -70,10 +70,10 @@ describe('ProjectFilters', () => {
       expect(featuredCheckbox).toBeChecked();
       expect(mockOnFilterChange).toHaveBeenCalledWith({ featured: true });
 
-      // Click again to disable featured filter - should call with featured: false
+      // Click again to disable featured filter - should call without featured parameter (undefined)
       fireEvent.click(featuredCheckbox);
       expect(featuredCheckbox).not.toBeChecked();
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({});
     });
   });
 
@@ -86,12 +86,12 @@ describe('ProjectFilters', () => {
       // Click to select category
       fireEvent.click(webButton);
       expect(webButton).toHaveAttribute('aria-pressed', 'true');
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ category: 'web', featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({ category: 'web' });
 
       // Click again to deselect category
       fireEvent.click(webButton);
       expect(webButton).toHaveAttribute('aria-pressed', 'false');
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({});
     });
 
     it('should only allow one category selection at a time', () => {
@@ -109,7 +109,7 @@ describe('ProjectFilters', () => {
       fireEvent.click(mobileButton);
       expect(webButton).toHaveAttribute('aria-pressed', 'false');
       expect(mobileButton).toHaveAttribute('aria-pressed', 'true');
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ category: 'mobile', featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({ category: 'mobile' });
     });
   });
 
@@ -123,7 +123,7 @@ describe('ProjectFilters', () => {
       // Select React
       fireEvent.click(reactButton);
       expect(reactButton).toHaveAttribute('aria-pressed', 'true');
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ tech: ['React'], featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({ tech: ['React'] });
 
       // Select TypeScript (should keep React selected)
       fireEvent.click(typescriptButton);
@@ -131,7 +131,6 @@ describe('ProjectFilters', () => {
       expect(typescriptButton).toHaveAttribute('aria-pressed', 'true');
       expect(mockOnFilterChange).toHaveBeenCalledWith({
         tech: ['React', 'TypeScript'],
-        featured: false,
       });
     });
 
@@ -147,7 +146,7 @@ describe('ProjectFilters', () => {
       // Deselect React
       fireEvent.click(reactButton);
       expect(reactButton).toHaveAttribute('aria-pressed', 'false');
-      expect(mockOnFilterChange).toHaveBeenCalledWith({ featured: false });
+      expect(mockOnFilterChange).toHaveBeenCalledWith({});
     });
   });
 
@@ -272,25 +271,23 @@ describe('ProjectFilters', () => {
   });
 
   describe('Filter Change Behavior', () => {
-    it('should always include featured parameter in filter calls', () => {
+    it('should omit featured parameter when checkbox is unchecked', () => {
       render(<ProjectFilters {...defaultProps} />);
 
       const webButton = screen.getByRole('button', { name: 'web' });
       const reactButton = screen.getByRole('button', { name: 'Filter by React' });
 
-      // Test category change includes featured: false
+      // Test category change omits featured parameter when false
       fireEvent.click(webButton);
       expect(mockOnFilterChange).toHaveBeenCalledWith({
         category: 'web',
-        featured: false,
       });
 
-      // Test technology change includes featured: false
+      // Test technology change omits featured parameter when false
       fireEvent.click(reactButton);
       expect(mockOnFilterChange).toHaveBeenCalledWith({
         category: 'web',
         tech: ['React'],
-        featured: false,
       });
     });
 
