@@ -5,6 +5,7 @@ import {
   ProjectSummary,
   ProjectDetail,
   ProjectsListResponse,
+  ProjectFilters,
 } from '../types/project.types';
 import { logger } from '../utils/logger';
 
@@ -161,6 +162,62 @@ export class ProjectService {
   }
 
   /**
+   * Get unique categories and technologies for filtering
+   * Returns aggregated filter options with Redis caching (30 min TTL)
+   */
+  async getProjectFilters(): Promise<ProjectFilters> {
+    try {
+      const cacheKey = 'projects:filters';
+
+      // Try to get from cache first
+      const cached = await cache.get<ProjectFilters>(cacheKey);
+      if (cached) {
+        logger.debug('Project filters fetched from cache');
+        return cached;
+      }
+
+      // Cache miss - fetch from database using aggregation
+      logger.debug('Project filters cache miss - fetching from database');
+
+      // Get unique categories (excluding null/empty)
+      const categoriesResult = await prisma.project.findMany({
+        select: { category: true },
+        where: { category: { not: null } },
+        distinct: ['category'],
+        orderBy: { category: 'asc' },
+      });
+
+      // Get all technologies arrays and flatten them to get unique values
+      const projectsWithTech = await prisma.project.findMany({
+        select: { technologies: true },
+        where: { technologies: { isEmpty: false } },
+      });
+
+      const categories = categoriesResult
+        .map((p: { category: string | null }) => p.category)
+        .filter((category: string | null): category is string => category !== null);
+
+      // Flatten all technologies arrays and get unique values
+      const allTechnologies: string[] = projectsWithTech.flatMap((p: { technologies: string[] }) => p.technologies);
+      const technologies: string[] = [...new Set(allTechnologies)].sort();
+
+      const filters: ProjectFilters = {
+        categories,
+        technologies,
+      };
+
+      // Cache the result
+      await cache.set(cacheKey, filters, CACHE_TTL_SECONDS);
+      logger.debug('Project filters cached successfully');
+
+      return filters;
+    } catch (error) {
+      logger.error('Error fetching project filters:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Invalidate all project caches
    * Should be called when projects are updated
    */
@@ -169,6 +226,7 @@ export class ProjectService {
       // Delete all keys matching the patterns
       await cache.delPattern(`${PROJECTS_CACHE_PREFIX}*`);
       await cache.delPattern(`${PROJECT_DETAIL_CACHE_PREFIX}*`);
+      await cache.del('projects:filters'); // Invalidate filters cache
       logger.debug('Project caches invalidated');
     } catch (error) {
       logger.error('Error invalidating project cache:', error);
@@ -183,8 +241,9 @@ export class ProjectService {
     try {
       const cacheKey = `${PROJECT_DETAIL_CACHE_PREFIX}${slug}`;
       await cache.del(cacheKey);
-      // Also invalidate all list caches as they may contain this project
+      // Also invalidate all list caches and filters cache as they may contain this project
       await cache.delPattern(`${PROJECTS_CACHE_PREFIX}*`);
+      await cache.del('projects:filters'); // Invalidate filters cache
       logger.debug('Project cache invalidated', { slug });
     } catch (error) {
       logger.error('Error invalidating project cache:', error);

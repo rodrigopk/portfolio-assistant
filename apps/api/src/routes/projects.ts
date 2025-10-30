@@ -28,6 +28,15 @@ const router = Router();
 router.get('/', rateLimiter, asyncHandler(projectController.getProjects.bind(projectController)));
 
 /**
+ * GET /api/projects/filters
+ * Description: Get unique categories and technologies for filtering
+ * Response: ProjectFilters object with arrays of unique categories and technologies
+ * Cache: 30 minutes (server-side Redis + client-side Cache-Control)
+ * Rate Limit: General API rate limit (100 requests per 15 minutes)
+ */
+router.get('/filters', rateLimiter, asyncHandler(projectController.getProjectFilters.bind(projectController)));
+
+/**
  * GET /api/projects/:slug
  * Description: Get detailed project information by slug
  * Path Parameters:

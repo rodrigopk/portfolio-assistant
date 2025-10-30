@@ -1,16 +1,20 @@
-import type { ProjectsListResponse, ProjectsQueryParams, ProjectDetail } from '../types/project';
+import type { ProjectsListResponse, ProjectsQueryParams, ProjectDetail, ProjectFilters } from '../types/project';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 class ApiError extends Error {
   constructor(
     message: string,
-    public status: number,
-    public code?: string,
+    status: number,
+    code?: string,
   ) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
   }
+  status: number;
+  code?: string;
 }
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -71,6 +75,10 @@ export const api = {
 
   async getProjectBySlug(slug: string): Promise<ProjectDetail> {
     return fetchApi<ProjectDetail>(`/api/projects/${slug}`);
+  },
+
+  async getProjectFilters(): Promise<ProjectFilters> {
+    return fetchApi<ProjectFilters>('/api/projects/filters');
   },
 };
 

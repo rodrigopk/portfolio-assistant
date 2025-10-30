@@ -26,6 +26,11 @@ export interface ProjectsListResponse {
   hasMore: boolean;
 }
 
+export interface ProjectFilters {
+  categories: string[];
+  technologies: string[];
+}
+
 export interface ProjectsQueryParams {
   featured?: boolean;
   category?: string;

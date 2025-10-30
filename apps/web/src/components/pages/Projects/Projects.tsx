@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { ProjectGrid } from '../../ProjectGrid';
 import { ProjectFilters } from '../../ProjectFilters';
 import { useProjects } from '../../../hooks/useProjects';
+import { useProjectFilters } from '../../../hooks/useProjectFilters';
 import type { ProjectsQueryParams } from '../../../types/project';
 
 const ITEMS_PER_PAGE = 9;
@@ -20,30 +21,12 @@ export function Projects() {
     offset,
   });
 
-  // Fetch all projects without filters to get unique categories and technologies
-  const { data: allProjectsData } = useProjects({ limit: 1000 });
+  // Fetch unique categories and technologies for filters using dedicated endpoint
+  const { data: filtersData } = useProjectFilters();
 
-  // Extract unique categories and technologies for filters
-  const { categories, technologies } = useMemo(() => {
-    if (!allProjectsData?.projects) {
-      return { categories: [], technologies: [] };
-    }
-
-    const categoriesSet = new Set<string>();
-    const technologiesSet = new Set<string>();
-
-    allProjectsData.projects.forEach((project) => {
-      if (project.category) {
-        categoriesSet.add(project.category);
-      }
-      project.technologies.forEach((tech) => technologiesSet.add(tech));
-    });
-
-    return {
-      categories: Array.from(categoriesSet).sort(),
-      technologies: Array.from(technologiesSet).sort(),
-    };
-  }, [allProjectsData]);
+  // Extract categories and technologies from the filters endpoint
+  const categories = filtersData?.categories || [];
+  const technologies = filtersData?.technologies || [];
 
   // Calculate total pages
   const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 1;
