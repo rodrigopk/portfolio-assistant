@@ -1,13 +1,14 @@
-import type { ProjectsListResponse, ProjectsQueryParams, ProjectDetail, ProjectFilters } from '../types/project';
+import type {
+  ProjectsListResponse,
+  ProjectsQueryParams,
+  ProjectDetail,
+  ProjectFilters,
+} from '../types/project';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 class ApiError extends Error {
-  constructor(
-    message: string,
-    status: number,
-    code?: string,
-  ) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -34,7 +35,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       throw new ApiError(
         error.error?.message || 'An error occurred',
         response.status,
-        error.error?.code,
+        error.error?.code
       );
     }
 

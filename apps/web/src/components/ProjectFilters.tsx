@@ -1,11 +1,7 @@
 import { useState } from 'react';
 
 interface ProjectFiltersProps {
-  onFilterChange: (filters: {
-    featured?: boolean;
-    category?: string;
-    tech?: string[];
-  }) => void;
+  onFilterChange: (filters: { featured?: boolean; category?: string; tech?: string[] }) => void;
   categories: string[];
   technologies: string[];
 }

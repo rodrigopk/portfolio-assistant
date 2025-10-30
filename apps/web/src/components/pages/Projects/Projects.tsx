@@ -52,10 +52,8 @@ export function Projects() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          Projects
-        </h1>
-        <p className="mt-2 text-base text-gray-600 dark:text-gray-300 sm:text-lg">
+        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white">Projects</h1>
+        <p className="mt-2 text-base text-gray-600 sm:text-lg dark:text-gray-300">
           Explore my portfolio of web applications and open-source contributions.
         </p>
       </div>

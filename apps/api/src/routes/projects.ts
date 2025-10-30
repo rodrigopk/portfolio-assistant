@@ -34,7 +34,11 @@ router.get('/', rateLimiter, asyncHandler(projectController.getProjects.bind(pro
  * Cache: 30 minutes (server-side Redis + client-side Cache-Control)
  * Rate Limit: General API rate limit (100 requests per 15 minutes)
  */
-router.get('/filters', rateLimiter, asyncHandler(projectController.getProjectFilters.bind(projectController)));
+router.get(
+  '/filters',
+  rateLimiter,
+  asyncHandler(projectController.getProjectFilters.bind(projectController))
+);
 
 /**
  * GET /api/projects/:slug

@@ -27,7 +27,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* Featured Badge */}
       {featured && (
         <div
-          className="absolute right-4 top-4 z-10 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
+          className="absolute top-4 right-4 z-10 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white"
           aria-label="Featured project"
         >
           Featured

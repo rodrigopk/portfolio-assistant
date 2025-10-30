@@ -198,7 +198,9 @@ export class ProjectService {
         .filter((category: string | null): category is string => category !== null);
 
       // Flatten all technologies arrays and get unique values
-      const allTechnologies: string[] = projectsWithTech.flatMap((p: { technologies: string[] }) => p.technologies);
+      const allTechnologies: string[] = projectsWithTech.flatMap(
+        (p: { technologies: string[] }) => p.technologies
+      );
       const technologies: string[] = [...new Set(allTechnologies)].sort();
 
       const filters: ProjectFilters = {

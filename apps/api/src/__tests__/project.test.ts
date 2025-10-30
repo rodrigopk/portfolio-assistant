@@ -384,10 +384,7 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
         // Mock database responses
-        const categoriesResponse = [
-          { category: 'web' },
-          { category: 'mobile' },
-        ];
+        const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
         const technologiesResponse = [
           { technologies: ['React', 'Node.js', 'PostgreSQL'] },
           { technologies: ['TypeScript', 'React', 'Express'] },
@@ -403,7 +400,15 @@ describe('Project API - Unit Tests', () => {
         expect(result.categories).toContainEqual('mobile');
         expect(result.categories).toContainEqual('web');
         expect(result.categories).toHaveLength(2);
-        expect(result.technologies).toEqual(['Express', 'Firebase', 'Node.js', 'PostgreSQL', 'React', 'React Native', 'TypeScript']);
+        expect(result.technologies).toEqual([
+          'Express',
+          'Firebase',
+          'Node.js',
+          'PostgreSQL',
+          'React',
+          'React Native',
+          'TypeScript',
+        ]);
         expect(cache.get).toHaveBeenCalledWith('projects:filters');
         expect(cache.set).toHaveBeenCalledWith('projects:filters', result, 1800);
       });
@@ -467,7 +472,9 @@ describe('Project API - Unit Tests', () => {
         const dbError = new Error('Database connection failed');
         vi.spyOn(prismaTyped.project, 'findMany').mockRejectedValue(dbError);
 
-        await expect(projectService.getProjectFilters()).rejects.toThrow('Database connection failed');
+        await expect(projectService.getProjectFilters()).rejects.toThrow(
+          'Database connection failed'
+        );
       });
     });
   });
@@ -690,10 +697,7 @@ describe('Project API - Integration Tests', () => {
 
   describe('GET /api/projects/filters', () => {
     it('should return 200 and project filters', async () => {
-      const categoriesResponse = [
-        { category: 'web' },
-        { category: 'mobile' },
-      ];
+      const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
       const technologiesResponse = [
         { technologies: ['React', 'Node.js'] },
         { technologies: ['TypeScript', 'React'] },
@@ -718,9 +722,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should return empty arrays when no projects exist', async () => {
-      vi.spyOn(prismaTyped.project, 'findMany')
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
       const response = await request(app).get('/api/projects/filters');
 
@@ -756,7 +758,7 @@ describe('Project API - Integration Tests', () => {
 
     it('should handle database errors gracefully', async () => {
       vi.clearAllMocks();
-      vi.spyOn(cache, 'get').mockResolvedValue(null);  // Ensure cache miss
+      vi.spyOn(cache, 'get').mockResolvedValue(null); // Ensure cache miss
       vi.spyOn(prismaTyped.project, 'findMany')
         .mockRejectedValueOnce(new Error('Database error'))
         .mockRejectedValueOnce(new Error('Database error'));
@@ -768,9 +770,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should return correct content-type header', async () => {
-      vi.spyOn(prismaTyped.project, 'findMany')
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
       const response = await request(app).get('/api/projects/filters');
 
@@ -858,10 +858,7 @@ describe('Project API - Integration Tests', () => {
       vi.spyOn(cache, 'get').mockResolvedValue(null);
       vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
-      const categoriesResponse = [
-        { category: 'web' },
-        { category: 'mobile' },
-      ];
+      const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
       const technologiesResponse = [
         { technologies: ['React', 'TypeScript', 'Node.js'] },
         { technologies: ['React Native', 'Firebase'] },
