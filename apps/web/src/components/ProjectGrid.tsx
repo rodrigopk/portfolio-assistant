@@ -149,15 +149,50 @@ export function ProjectGrid({
                 </button>
 
                 {/* Page Numbers */}
-                {[...Array(totalPages)].map((_, i) => {
-                  const page = i + 1;
-                  // Show first, last, current, and pages around current
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
+                {(() => {
+                  const pages = [];
+                  const showLeftEllipsis = currentPage > 4; // Show left ellipsis if current page > 4
+                  const showRightEllipsis = currentPage < totalPages - 3; // Show right ellipsis if current page < totalPages - 3
+
+                  // Always show page 1
+                  pages.push(
+                    <button
+                      key={1}
+                      onClick={() => onPageChange(1)}
+                      className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium focus:z-20 ${
+                        currentPage === 1
+                          ? 'z-10 border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-300'
+                          : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                      }`}
+                      aria-label="Page 1"
+                      aria-current={currentPage === 1 ? 'page' : undefined}
+                    >
+                      1
+                    </button>
+                  );
+
+                  // Show left ellipsis if needed
+                  if (showLeftEllipsis) {
+                    pages.push(
+                      <span
+                        key="left-ellipsis"
+                        className="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        aria-label="More pages"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+
+                  // Show pages around current page
+                  const startPage = Math.max(2, currentPage - 1);
+                  const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                  for (let page = startPage; page <= endPage; page++) {
+                    // Skip page 1 and last page as they're handled separately
+                    if (page === 1 || page === totalPages) continue;
+
+                    pages.push(
                       <button
                         key={page}
                         onClick={() => onPageChange(page)}
@@ -172,18 +207,42 @@ export function ProjectGrid({
                         {page}
                       </button>
                     );
-                  } else if (page === currentPage - 2 || page === currentPage + 2) {
-                    return (
+                  }
+
+                  // Show right ellipsis if needed
+                  if (showRightEllipsis) {
+                    pages.push(
                       <span
-                        key={page}
+                        key="right-ellipsis"
                         className="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        aria-label="More pages"
                       >
                         ...
                       </span>
                     );
                   }
-                  return null;
-                })}
+
+                  // Always show last page if there's more than 1 page
+                  if (totalPages > 1) {
+                    pages.push(
+                      <button
+                        key={totalPages}
+                        onClick={() => onPageChange(totalPages)}
+                        className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium focus:z-20 ${
+                          currentPage === totalPages
+                            ? 'z-10 border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-300'
+                            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }`}
+                        aria-label={`Page ${totalPages}`}
+                        aria-current={currentPage === totalPages ? 'page' : undefined}
+                      >
+                        {totalPages}
+                      </button>
+                    );
+                  }
+
+                  return pages;
+                })()}
 
                 {/* Next Button */}
                 <button

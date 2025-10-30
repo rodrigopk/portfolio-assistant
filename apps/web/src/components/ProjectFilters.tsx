@@ -132,11 +132,7 @@ export function ProjectFilters({ onFilterChange, categories, technologies }: Pro
         <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-400" role="status">
             Active filters:{' '}
-            {[
-              featuredOnly && 'Featured',
-              selectedCategory,
-              ...selectedTech.map((t) => t),
-            ]
+            {[featuredOnly && 'Featured', selectedCategory, ...selectedTech.map((t) => t)]
               .filter(Boolean)
               .join(', ')}
           </p>
