@@ -84,6 +84,36 @@ export class ProjectController {
       throw error; // Will be caught by error middleware
     }
   }
+
+  /**
+   * GET /api/projects/filters
+   * Returns unique categories and technologies for filtering with Redis caching (30 min TTL)
+   * Per TECHNICAL_DOCUMENTATION.md Section 5.1.2
+   */
+  async getProjectFilters(_req: Request, res: Response): Promise<void> {
+    try {
+      const filters = await projectService.getProjectFilters();
+
+      const response: ApiResponse = {
+        data: filters,
+      };
+
+      // Set cache headers for client-side caching (30 minutes)
+      res.set({
+        'Cache-Control': 'public, max-age=1800', // 30 minutes
+        ETag: `"project-filters-${Date.now()}"`,
+      });
+
+      res.status(200).json(response);
+      logger.info('Project filters retrieved successfully', {
+        categoriesCount: filters.categories.length,
+        technologiesCount: filters.technologies.length,
+      });
+    } catch (error) {
+      logger.error('Error in getProjectFilters controller:', error);
+      throw error; // Will be caught by error middleware
+    }
+  }
 }
 
 // Export singleton instance

@@ -355,12 +355,14 @@ describe('Project API - Unit Tests', () => {
     describe('Cache invalidation', () => {
       it('should invalidate all project caches', async () => {
         vi.spyOn(cache, 'delPattern').mockResolvedValue(undefined);
+        vi.spyOn(cache, 'del').mockResolvedValue(undefined);
 
         await projectService.invalidateCache();
 
         expect(cache.delPattern).toHaveBeenCalledTimes(2);
         expect(cache.delPattern).toHaveBeenCalledWith('projects:list:*');
         expect(cache.delPattern).toHaveBeenCalledWith('projects:detail:*');
+        expect(cache.del).toHaveBeenCalledWith('projects:filters');
       });
 
       it('should invalidate cache for specific project', async () => {
@@ -370,7 +372,109 @@ describe('Project API - Unit Tests', () => {
         await projectService.invalidateProjectCache('ecommerce-platform');
 
         expect(cache.del).toHaveBeenCalledWith('projects:detail:ecommerce-platform');
+        expect(cache.del).toHaveBeenCalledWith('projects:filters');
         expect(cache.delPattern).toHaveBeenCalledWith('projects:list:*');
+      });
+    });
+
+    describe('getProjectFilters', () => {
+      it('should return unique categories and technologies from database when cache is empty', async () => {
+        // Mock cache miss
+        vi.spyOn(cache, 'get').mockResolvedValue(null);
+        vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+
+        // Mock database responses
+        const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
+        const technologiesResponse = [
+          { technologies: ['React', 'Node.js', 'PostgreSQL'] },
+          { technologies: ['TypeScript', 'React', 'Express'] },
+          { technologies: ['React Native', 'Firebase'] },
+        ];
+
+        vi.spyOn(prismaTyped.project, 'findMany')
+          .mockResolvedValueOnce(categoriesResponse as any)
+          .mockResolvedValueOnce(technologiesResponse as any);
+
+        const result = await projectService.getProjectFilters();
+
+        expect(result.categories).toContainEqual('mobile');
+        expect(result.categories).toContainEqual('web');
+        expect(result.categories).toHaveLength(2);
+        expect(result.technologies).toEqual([
+          'Express',
+          'Firebase',
+          'Node.js',
+          'PostgreSQL',
+          'React',
+          'React Native',
+          'TypeScript',
+        ]);
+        expect(cache.get).toHaveBeenCalledWith('projects:filters');
+        expect(cache.set).toHaveBeenCalledWith('projects:filters', result, 1800);
+      });
+
+      it('should return filters from cache when available', async () => {
+        const cachedFilters = {
+          categories: ['web', 'mobile'],
+          technologies: ['React', 'TypeScript', 'Node.js'],
+        };
+
+        // Mock cache hit
+        vi.spyOn(cache, 'get').mockResolvedValue(cachedFilters);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([]);
+
+        const result = await projectService.getProjectFilters();
+
+        expect(result).toEqual(cachedFilters);
+        expect(cache.get).toHaveBeenCalledWith('projects:filters');
+        expect(prismaTyped.project.findMany).not.toHaveBeenCalled();
+      });
+
+      it('should handle empty database results', async () => {
+        vi.spyOn(cache, 'get').mockResolvedValue(null);
+        vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+
+        // Mock empty database responses
+        vi.spyOn(prismaTyped.project, 'findMany')
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([]);
+
+        const result = await projectService.getProjectFilters();
+
+        expect(result.categories).toEqual([]);
+        expect(result.technologies).toEqual([]);
+      });
+
+      it('should filter out null categories', async () => {
+        vi.spyOn(cache, 'get').mockResolvedValue(null);
+        vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+
+        const categoriesResponse = [
+          { category: 'web' },
+          { category: null },
+          { category: 'mobile' },
+        ];
+
+        vi.spyOn(prismaTyped.project, 'findMany')
+          .mockResolvedValueOnce(categoriesResponse as any)
+          .mockResolvedValueOnce([]);
+
+        const result = await projectService.getProjectFilters();
+
+        expect(result.categories).toContainEqual('mobile');
+        expect(result.categories).toContainEqual('web');
+        expect(result.categories).toHaveLength(2);
+        expect(result.categories).not.toContain(null);
+      });
+
+      it('should handle database errors gracefully', async () => {
+        vi.spyOn(cache, 'get').mockResolvedValue(null);
+        const dbError = new Error('Database connection failed');
+        vi.spyOn(prismaTyped.project, 'findMany').mockRejectedValue(dbError);
+
+        await expect(projectService.getProjectFilters()).rejects.toThrow(
+          'Database connection failed'
+        );
       });
     });
   });
@@ -591,8 +695,94 @@ describe('Project API - Integration Tests', () => {
     });
   });
 
+  describe('GET /api/projects/filters', () => {
+    it('should return 200 and project filters', async () => {
+      const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
+      const technologiesResponse = [
+        { technologies: ['React', 'Node.js'] },
+        { technologies: ['TypeScript', 'React'] },
+      ];
+
+      vi.spyOn(prismaTyped.project, 'findMany')
+        .mockResolvedValueOnce(categoriesResponse as any)
+        .mockResolvedValueOnce(technologiesResponse as any);
+
+      const response = await request(app).get('/api/projects/filters');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('categories');
+      expect(response.body.data).toHaveProperty('technologies');
+      expect(Array.isArray(response.body.data.categories)).toBe(true);
+      expect(Array.isArray(response.body.data.technologies)).toBe(true);
+
+      // Check response headers
+      expect(response.headers['cache-control']).toBe('public, max-age=1800');
+      expect(response.headers['etag']).toBeDefined();
+    });
+
+    it('should return empty arrays when no projects exist', async () => {
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      const response = await request(app).get('/api/projects/filters');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.categories).toEqual([]);
+      expect(response.body.data.technologies).toEqual([]);
+    });
+
+    it('should return cached data on subsequent requests', async () => {
+      const categoriesResponse = [{ category: 'web' }];
+      const technologiesResponse = [{ technologies: ['React'] }];
+
+      vi.spyOn(prismaTyped.project, 'findMany')
+        .mockResolvedValueOnce(categoriesResponse as any)
+        .mockResolvedValueOnce(technologiesResponse as any);
+
+      const response1 = await request(app).get('/api/projects/filters');
+      expect(response1.status).toBe(200);
+
+      // For the second request, mock the cache to return the cached result
+      // and ensure findMany is not called
+      vi.clearAllMocks();
+      vi.spyOn(cache, 'get').mockResolvedValue(response1.body.data);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([]);
+
+      const response2 = await request(app).get('/api/projects/filters');
+      expect(response2.status).toBe(200);
+      expect(response2.body.data).toEqual(response1.body.data);
+
+      // Verify that findMany was not called on the second request (cache hit)
+      expect(prismaTyped.project.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should handle database errors gracefully', async () => {
+      vi.clearAllMocks();
+      vi.spyOn(cache, 'get').mockResolvedValue(null); // Ensure cache miss
+      vi.spyOn(prismaTyped.project, 'findMany')
+        .mockRejectedValueOnce(new Error('Database error'))
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app).get('/api/projects/filters');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should return correct content-type header', async () => {
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      const response = await request(app).get('/api/projects/filters');
+
+      expect(response.headers['content-type']).toMatch(/application\/json/);
+    });
+  });
+
   describe('Response schema validation', () => {
     it('should match list response schema', async () => {
+      vi.clearAllMocks();
+      vi.spyOn(cache, 'get').mockResolvedValue(null);
+      vi.spyOn(cache, 'set').mockResolvedValue(undefined);
       vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(1);
       vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
 
@@ -624,6 +814,9 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should match detail response schema', async () => {
+      vi.clearAllMocks();
+      vi.spyOn(cache, 'get').mockResolvedValue(null);
+      vi.spyOn(cache, 'set').mockResolvedValue(undefined);
       vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
       const response = await request(app).get('/api/projects/ecommerce-platform');
@@ -658,6 +851,51 @@ describe('Project API - Integration Tests', () => {
       expect(Array.isArray(data.technologies)).toBe(true);
       expect(typeof data.featured).toBe('boolean');
       expect(typeof data.category).toBe('string');
+    });
+
+    it('should match filters response schema', async () => {
+      vi.clearAllMocks();
+      vi.spyOn(cache, 'get').mockResolvedValue(null);
+      vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+
+      const categoriesResponse = [{ category: 'web' }, { category: 'mobile' }];
+      const technologiesResponse = [
+        { technologies: ['React', 'TypeScript', 'Node.js'] },
+        { technologies: ['React Native', 'Firebase'] },
+      ];
+
+      vi.spyOn(prismaTyped.project, 'findMany')
+        .mockResolvedValueOnce(categoriesResponse as any)
+        .mockResolvedValueOnce(technologiesResponse as any);
+
+      const response = await request(app).get('/api/projects/filters');
+
+      expect(response.status).toBe(200);
+
+      const { data } = response.body;
+
+      // Verify filters response structure
+      expect(data).toHaveProperty('categories');
+      expect(data).toHaveProperty('technologies');
+      expect(Array.isArray(data.categories)).toBe(true);
+      expect(Array.isArray(data.technologies)).toBe(true);
+
+      // Verify data types
+      data.categories.forEach((category: any) => {
+        expect(typeof category).toBe('string');
+      });
+
+      data.technologies.forEach((tech: any) => {
+        expect(typeof tech).toBe('string');
+      });
+
+      // Verify arrays have content and are unique
+      expect(data.categories.length).toBeGreaterThan(0);
+      expect(data.technologies.length).toBeGreaterThan(0);
+
+      // Verify uniqueness
+      expect(new Set(data.categories).size).toBe(data.categories.length);
+      expect(new Set(data.technologies).size).toBe(data.technologies.length);
     });
   });
 });

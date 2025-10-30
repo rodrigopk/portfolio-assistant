@@ -100,6 +100,14 @@ export interface ProjectsListResponse {
 }
 
 /**
+ * Response schema for GET /api/projects/filters
+ */
+export interface ProjectFilters {
+  categories: string[];
+  technologies: string[];
+}
+
+/**
  * Full Project model from database
  */
 export interface Project {

@@ -17,7 +17,11 @@ const app: Application = express();
 app.use(helmet());
 
 // CORS configuration
-const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || ['http://localhost:3000'];
+const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || [
+  'http://localhost:3000',
+  'http://localhost:5173', // Vite default dev port
+  'http://localhost:4173', // Vite alternative dev port
+];
 app.use(
   cors({
     origin: (origin, callback) => {
