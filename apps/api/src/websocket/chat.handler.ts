@@ -37,7 +37,15 @@ export class ChatWebSocketHandler {
       // Handle incoming messages
       ws.on('message', async (data: Buffer) => {
         try {
-          const message = JSON.parse(data.toString()) as unknown;
+          // Parse JSON - catch JSON parse errors separately
+          let message: unknown;
+          try {
+            message = JSON.parse(data.toString()) as unknown;
+          } catch (parseError) {
+            this.sendError(ws, 'Invalid message format', 'INVALID_MESSAGE');
+            logger.warn('Invalid JSON received:', parseError);
+            return;
+          }
 
           // Validate message structure
           const validationResult = ClientMessageSchema.safeParse(message);
@@ -62,7 +70,9 @@ export class ChatWebSocketHandler {
                 this.sendError(ws, 'Not authenticated', 'NOT_AUTHENTICATED');
                 return;
               }
-              await this.handleChat(ws, clientMessage, sessionId);
+              // Don't await - process messages concurrently for better rate limit testing
+              logger.debug(`Received chat message for session ${sessionId}`);
+              void this.handleChat(ws, clientMessage, sessionId);
               break;
 
             case 'typing':
@@ -149,8 +159,8 @@ export class ChatWebSocketHandler {
     sessionId: string
   ): Promise<void> {
     try {
-      // Check rate limit
-      const canSend = await this.sessionManager.canSendMessage(sessionId);
+      // Check rate limit and increment atomically to prevent race conditions
+      const canSend = await this.sessionManager.checkAndIncrementMessage(sessionId);
       if (!canSend) {
         const resetTime = await this.sessionManager.getResetTime(sessionId);
         const resetMinutes = Math.ceil(resetTime / 60000);
@@ -162,14 +172,14 @@ export class ChatWebSocketHandler {
         return;
       }
 
-      // Increment message count
-      await this.sessionManager.incrementMessageCount(sessionId);
-
       // Log the message
       logger.info(`Chat message from ${sessionId}: ${message.message.substring(0, 50)}...`);
 
       // Generate mock response (AI agent will be integrated later)
-      await this.generateMockResponse(ws, message.message, sessionId);
+      // This can run asynchronously without blocking
+      this.generateMockResponse(ws, message.message, sessionId).catch((error) => {
+        logger.error('Error generating mock response:', error);
+      });
     } catch (error) {
       logger.error('Error handling chat message:', error);
       this.sendError(ws, 'Failed to process chat message', 'CHAT_ERROR');

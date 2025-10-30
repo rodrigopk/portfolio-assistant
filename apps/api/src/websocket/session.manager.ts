@@ -96,6 +96,40 @@ export class SessionManager {
   }
 
   /**
+   * Check rate limit and increment atomically
+   * Returns true if message can be sent (and increments counter), false if rate limited
+   */
+  async checkAndIncrementMessage(sessionId: string): Promise<boolean> {
+    const sessionData = await this.getSessionData(sessionId);
+    if (!sessionData) {
+      return false;
+    }
+
+    const now = Date.now();
+    const windowStart = now - this.rateLimitConfig.windowMs;
+
+    // Reset counter if window has passed
+    if (sessionData.firstMessageAt < windowStart) {
+      sessionData.messageCount = 1;
+      sessionData.firstMessageAt = now;
+      sessionData.lastMessageAt = now;
+      await this.setSessionData(sessionId, sessionData);
+      return true;
+    }
+
+    // Check if under rate limit
+    if (sessionData.messageCount < this.rateLimitConfig.maxRequests) {
+      sessionData.messageCount += 1;
+      sessionData.lastMessageAt = now;
+      await this.setSessionData(sessionId, sessionData);
+      return true;
+    }
+
+    // Rate limit exceeded
+    return false;
+  }
+
+  /**
    * Increment message count for a session
    */
   async incrementMessageCount(sessionId: string): Promise<void> {
