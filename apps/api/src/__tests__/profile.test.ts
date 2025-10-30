@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// Note: The `any` type is used in tests for Prisma mock responses and HTTP response bodies
+// where the exact types are complex and mocking would be overly verbose for test purposes
 import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
@@ -130,25 +132,51 @@ describe('Profile API - Unit Tests', () => {
 });
 
 describe('Profile API - Integration Tests', () => {
+  let redisConnected = false;
+
   beforeAll(async () => {
-    // Connect to Redis for integration tests
+    // Connect to Redis for integration tests with timeout
     try {
-      await connectRedis();
+      await Promise.race([
+        connectRedis().then(() => {
+          redisConnected = true;
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Redis connection timeout')), 2000)
+        )
+      ]);
     } catch (error) {
-      console.warn('Redis connection failed, tests may not work properly:', error);
+      console.warn('Redis connection failed, tests will run with mocked cache:', error);
+      redisConnected = false;
+      // Mock cache operations when Redis is not available
+      vi.spyOn(cache, 'get').mockResolvedValue(null);
+      vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+      vi.spyOn(cache, 'del').mockResolvedValue(undefined);
     }
   });
 
   afterAll(async () => {
     // Cleanup
-    await cache.del('profile:main');
-    await disconnectRedis();
+    try {
+      if (redisConnected) {
+        await cache.del('profile:main');
+        await disconnectRedis();
+      }
+    } catch (error) {
+      console.warn('Error during Redis cleanup:', error);
+    }
     await prisma.$disconnect();
   });
 
   beforeEach(async () => {
-    // Clear cache before each test
-    await cache.del('profile:main');
+    // Clear cache before each test only if Redis is connected
+    try {
+      if (redisConnected) {
+        await cache.del('profile:main');
+      }
+    } catch (error) {
+      console.warn('Error clearing cache:', error);
+    }
   });
 
   describe('GET /api/profile', () => {
