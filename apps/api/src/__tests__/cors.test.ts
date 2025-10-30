@@ -120,7 +120,11 @@ describe('CORS Configuration', () => {
   describe('Environment Variable Configuration', () => {
     it('should use environment variable for allowed origins', () => {
       // This test verifies that the CORS middleware reads from ALLOWED_ORIGINS env var
-      const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || ['http://localhost:3000'];
+      const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || [
+        'http://localhost:3000',
+        'http://localhost:5173', // Vite default dev port
+        'http://localhost:4173'  // Vite alternative dev port
+      ];
       expect(allowedOrigins).toContain('http://localhost:5173');
       expect(allowedOrigins).toContain('http://localhost:4173');
     });
