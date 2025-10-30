@@ -7,6 +7,8 @@ import { logger } from '../utils/logger';
 export class SessionManager {
   private sessions: Map<string, WebSocket>;
   private rateLimitConfig: RateLimitConfig;
+  private lastRedisWarningTime: number = 0;
+  private readonly REDIS_WARNING_THROTTLE_MS = 60000; // Log warning once per minute
 
   constructor(rateLimitConfig: RateLimitConfig = DEFAULT_RATE_LIMIT) {
     this.sessions = new Map();
@@ -186,16 +188,37 @@ export class SessionManager {
   }
 
   /**
+   * Log Redis unavailability warning with rate limiting to prevent log noise
+   */
+  private logRedisUnavailableWarning(): void {
+    const now = Date.now();
+    if (now - this.lastRedisWarningTime >= this.REDIS_WARNING_THROTTLE_MS) {
+      logger.warn(
+        'Redis is not connected. WebSocket session data will not be persisted. This message is rate-limited to once per minute.'
+      );
+      this.lastRedisWarningTime = now;
+    }
+  }
+
+  /**
    * Store session data in Redis
    */
   private async setSessionData(sessionId: string, data: SessionData): Promise<void> {
+    // Check if Redis is connected before attempting operation
+    if (!redisClient.isOpen) {
+      this.logRedisUnavailableWarning();
+      logger.debug(`Unable to store session data for ${sessionId} - Redis not connected`);
+      return;
+    }
+
     try {
       const key = `websocket:session:${sessionId}`;
       const ttlSeconds = Math.ceil(this.rateLimitConfig.windowMs / 1000) + 60; // Add 1 minute buffer
       await redisClient.setEx(key, ttlSeconds, JSON.stringify(data));
     } catch (error) {
       logger.error(`Failed to set session data for ${sessionId}:`, error);
-      throw error;
+      // Don't throw - allow WebSocket functionality to continue without Redis
+      this.logRedisUnavailableWarning();
     }
   }
 
@@ -203,6 +226,12 @@ export class SessionManager {
    * Get session data from Redis
    */
   private async getSessionData(sessionId: string): Promise<SessionData | null> {
+    // Check if Redis is connected before attempting operation
+    if (!redisClient.isOpen) {
+      logger.debug(`Redis is not connected. Unable to retrieve session data for ${sessionId}.`);
+      return null;
+    }
+
     try {
       const key = `websocket:session:${sessionId}`;
       const data = await redisClient.get(key);
@@ -220,6 +249,12 @@ export class SessionManager {
    * Delete session data from Redis
    */
   private async deleteSessionData(sessionId: string): Promise<void> {
+    // Check if Redis is connected before attempting operation
+    if (!redisClient.isOpen) {
+      logger.debug(`Redis is not connected. Unable to delete session data for ${sessionId}.`);
+      return;
+    }
+
     try {
       const key = `websocket:session:${sessionId}`;
       await redisClient.del(key);
