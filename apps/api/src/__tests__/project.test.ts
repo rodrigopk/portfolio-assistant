@@ -144,6 +144,31 @@ describe('Project API - Unit Tests', () => {
         expect(cache.set).toHaveBeenCalled();
       });
 
+      it('should return all projects when no filtering parameters are provided', async () => {
+        // Mock cache miss
+        vi.spyOn(cache, 'get').mockResolvedValue(null);
+        vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+
+        // Mock database response - all projects
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(mockProjects.length);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(mockProjects as any);
+
+        // Call with empty object (no filters)
+        const result = await projectService.getProjects({});
+
+        expect(result.projects).toHaveLength(3);
+        expect(result.total).toBe(3);
+        
+        // Verify that the where clause was empty (no filters applied)
+        expect(prismaTyped.project.count).toHaveBeenCalledWith({ where: {} });
+        expect(prismaTyped.project.findMany).toHaveBeenCalledWith({
+          where: {},
+          orderBy: [{ featured: 'desc' }, { order: 'asc' }, { createdAt: 'desc' }],
+          take: 20,
+          skip: 0,
+        });
+      });
+
       it('should return projects from cache when available', async () => {
         const cachedResponse = {
           projects: mockProjectSummaries,
@@ -400,6 +425,30 @@ describe('Project API - Integration Tests', () => {
   });
 
   describe('GET /api/projects', () => {
+    it('should return 200 and all projects when no query parameters provided', async () => {
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(mockProjects.length);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(mockProjects as any);
+
+      const response = await request(app).get('/api/projects');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('meta');
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.meta).toHaveProperty('total', 3);
+      expect(response.body.meta).toHaveProperty('hasMore', false);
+
+      // Verify no filters were applied
+      expect(prismaTyped.project.count).toHaveBeenCalledWith({ where: {} });
+      expect(prismaTyped.project.findMany).toHaveBeenCalledWith({
+        where: {},
+        orderBy: [{ featured: 'desc' }, { order: 'asc' }, { createdAt: 'desc' }],
+        take: 20,
+        skip: 0,
+      });
+    });
+
     it('should return 200 and projects list', async () => {
       vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(mockProjects.length);
       vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(mockProjects as any);

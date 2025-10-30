@@ -8,7 +8,10 @@ export const projectsQuerySchema = z.object({
   featured: z
     .string()
     .optional()
-    .transform((val: string | undefined) => val === 'true'),
+    .transform((val: string | undefined) => {
+      if (val === undefined) return undefined;
+      return val === 'true';
+    }),
   category: z.string().optional(),
   tech: z
     .string()
