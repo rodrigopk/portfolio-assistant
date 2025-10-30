@@ -88,7 +88,7 @@ export class ProjectService {
       const response: ProjectsListResponse = {
         projects: projectSummaries,
         total,
-        hasMore: offset + limit < total,
+        hasMore: offset + projectSummaries.length < total,
       };
 
       // Cache the result
