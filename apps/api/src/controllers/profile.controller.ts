@@ -30,7 +30,7 @@ export class ProfileController {
       // Set cache headers for client-side caching
       res.set({
         'Cache-Control': 'public, max-age=3600', // 1 hour
-        'ETag': `"profile-${Date.now()}"`,
+        ETag: `"profile-${Date.now()}"`,
       });
 
       res.status(200).json(response);

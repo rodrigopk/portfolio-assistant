@@ -16,7 +16,9 @@ export const projectsQuerySchema = z.object({
   tech: z
     .string()
     .optional()
-    .transform((val: string | undefined) => (val ? val.split(',').map((t: string) => t.trim()) : undefined)),
+    .transform((val: string | undefined) =>
+      val ? val.split(',').map((t: string) => t.trim()) : undefined
+    ),
   limit: z
     .string()
     .optional()

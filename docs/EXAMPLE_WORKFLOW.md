@@ -15,6 +15,7 @@ This document shows a real-world example of using the documentation suite to imp
 ## Step 1: Understanding the Requirements (15 minutes)
 
 ### What you do:
+
 1. Open `TECHNICAL_DOCUMENTATION.md`
 2. Read these sections:
    - Section 3.2: Chat Agent design
@@ -23,6 +24,7 @@ This document shows a real-world example of using the documentation suite to imp
    - Section 6.1: ChatWidget component hierarchy
 
 ### What you learn:
+
 - Chat uses WebSocket for real-time communication
 - Agent has 5 function tools (searchProjects, etc.)
 - Messages stream token-by-token
@@ -59,6 +61,7 @@ We'll integrate the Mastra agent in the next step.
 ```
 
 ### What Claude Code does:
+
 1. Creates the file structure
 2. Implements WebSocket server
 3. Adds session management with Redis
@@ -120,6 +123,7 @@ Please implement each tool with its own test file.
 ```
 
 ### What Claude Code does:
+
 1. Sets up Mastra agent configuration
 2. Implements all 5 function tools
 3. Connects to Claude API
@@ -222,6 +226,7 @@ Create:
 ```
 
 ### What Claude Code does:
+
 1. Creates complete component hierarchy
 2. Implements WebSocket hook with reconnection
 3. Adds ChatContext for state management
@@ -472,34 +477,40 @@ Create deployment checklist and verify each step.
 After following this workflow, you have:
 
 ✅ **Backend**:
+
 - WebSocket server with session management
 - Rate limiting and error handling
 - Comprehensive test coverage
 
 ✅ **AI Agent**:
+
 - Mastra-powered chat agent
 - 5 function tools for portfolio queries
 - Conversation history
 - Fallback handling
 
 ✅ **Frontend**:
+
 - Beautiful, responsive chat widget
 - Real-time message streaming
 - Smooth animations
 - Accessible interface
 
 ✅ **Testing**:
+
 - Unit tests for all components
 - Integration tests for full flow
 - E2E tests for user scenarios
 - 80%+ code coverage
 
 ✅ **Documentation**:
+
 - Updated README
 - API documentation
 - Troubleshooting guide
 
 ✅ **Production Ready**:
+
 - Deployed and monitored
 - Error tracking configured
 - Performance optimized
@@ -508,16 +519,16 @@ After following this workflow, you have:
 
 ## Time Breakdown
 
-| Phase | Time | What You Did |
-|-------|------|--------------|
-| Understanding | 15 min | Read documentation |
-| Backend WebSocket | 45 min | Implement + test |
-| AI Agent | 90 min | Mastra setup + tools |
-| Frontend Widget | 90 min | React components + styling |
-| Integration Testing | 30 min | E2E tests |
-| Manual Testing | 30 min | QA and polish |
-| Documentation | 15 min | Update docs |
-| **Total** | **5 hours** | Complete feature! |
+| Phase               | Time        | What You Did               |
+| ------------------- | ----------- | -------------------------- |
+| Understanding       | 15 min      | Read documentation         |
+| Backend WebSocket   | 45 min      | Implement + test           |
+| AI Agent            | 90 min      | Mastra setup + tools       |
+| Frontend Widget     | 90 min      | React components + styling |
+| Integration Testing | 30 min      | E2E tests                  |
+| Manual Testing      | 30 min      | QA and polish              |
+| Documentation       | 15 min      | Update docs                |
+| **Total**           | **5 hours** | Complete feature!          |
 
 ---
 

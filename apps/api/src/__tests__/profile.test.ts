@@ -143,7 +143,7 @@ describe('Profile API - Integration Tests', () => {
         }),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Redis connection timeout')), 2000)
-        )
+        ),
       ]);
     } catch (error) {
       console.warn('Redis connection failed, tests will run with mocked cache:', error);

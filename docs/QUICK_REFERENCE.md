@@ -7,6 +7,7 @@ Quick copy-paste prompts for common tasks. See `CLAUDE_CODE_PROMPT_GUIDE.md` for
 ## 🚀 Getting Started
 
 ### Initialize Backend
+
 ```
 According to TECHNICAL_DOCUMENTATION.md section 7.5, please initialize the backend project in apps/api/ with:
 - Node.js 20+ and Express.js with TypeScript
@@ -21,6 +22,7 @@ Create all necessary files and explain the structure.
 ```
 
 ### Initialize Database
+
 ```
 Following TECHNICAL_DOCUMENTATION.md section 4, set up Prisma:
 - Initialize in packages/database/
@@ -34,6 +36,7 @@ Verify schema matches documentation exactly.
 ```
 
 ### Initialize Frontend
+
 ```
 Following TECHNICAL_DOCUMENTATION.md, create the React frontend in apps/web/:
 - Vite + React 18+ + TypeScript
@@ -52,6 +55,7 @@ Create a working app that renders layout and routing.
 ## 🔨 Backend Endpoints
 
 ### Simple Endpoint (Profile)
+
 ```
 Implement GET /api/profile per TECHNICAL_DOCUMENTATION.md section 5.1.1:
 - Exact response schema from docs
@@ -71,6 +75,7 @@ File structure:
 ```
 
 ### Complex Endpoint (Projects)
+
 ```
 Implement project endpoints per section 5.1.2:
 - GET /api/projects (with filtering, pagination)
@@ -87,6 +92,7 @@ Clean service layer: routes → controllers → services
 ```
 
 ### WebSocket Endpoint
+
 ```
 Implement chat WebSocket per sections 5.1.3 and 5.2:
 - WebSocket server setup
@@ -110,6 +116,7 @@ Use mock responses for now (AI agent later).
 ## 🎨 Frontend Components
 
 ### Page with Data Fetching
+
 ```
 Implement Projects page per section 6.1:
 - Projects page with ProjectGrid and ProjectFilters
@@ -131,6 +138,7 @@ Components:
 ```
 
 ### Complex Widget (Chat)
+
 ```
 Create ChatWidget per section 6.1:
 - ChatButton, ChatWindow, MessageList, MessageInput
@@ -154,6 +162,7 @@ Create:
 ## 🤖 AI Agents
 
 ### Chat Agent with Mastra
+
 ```
 Implement Chat Agent per section 3.2:
 - Create packages/agents/ workspace
@@ -179,6 +188,7 @@ Integrate with WebSocket handler.
 ```
 
 ### RAG System
+
 ```
 Implement RAG per section 3.7:
 - PostgreSQL with pgvector OR Pinecone
@@ -203,6 +213,7 @@ Files:
 ## 🧪 Testing & Quality
 
 ### Test Infrastructure
+
 ```
 Set up testing per section 7.3:
 - Install Vitest, React Testing Library, Supertest
@@ -224,6 +235,7 @@ Files:
 ```
 
 ### Linting Setup
+
 ```
 Set up code quality per section 7.4:
 - ESLint with TypeScript (section 7.4.2)
@@ -247,6 +259,7 @@ Block commits if:
 ## 🔐 Security & Monitoring
 
 ### Security Features
+
 ```
 Implement security per section 9:
 - JWT authentication (section 9.1)
@@ -262,6 +275,7 @@ Implement security per section 9:
 ```
 
 ### Monitoring Stack
+
 ```
 Implement monitoring per section 10:
 - Winston structured logging (section 10.1)
@@ -284,6 +298,7 @@ Log all AI interactions with costs/tokens/latency.
 ## ✅ Verification Commands
 
 ### Verify Implementation
+
 ```
 Verify this matches TECHNICAL_DOCUMENTATION.md section [X.X]:
 1. API contract (request/response format)
@@ -297,6 +312,7 @@ List any discrepancies.
 ```
 
 ### Run Tests
+
 ```
 Run all tests and report:
 1. Test results (pass/fail)
@@ -306,6 +322,7 @@ Run all tests and report:
 ```
 
 ### Code Quality Check
+
 ```
 Review against section 7.4 code style guidelines:
 1. ESLint compliance
@@ -322,6 +339,7 @@ Fix any issues found.
 ## 🔧 Troubleshooting
 
 ### Debug Implementation
+
 ```
 Implementation isn't working. Please:
 1. Review section [X.X] of TECHNICAL_DOCUMENTATION.md
@@ -332,6 +350,7 @@ Implementation isn't working. Please:
 ```
 
 ### Debug Tests
+
 ```
 Tests are failing. Please:
 1. Run tests and show output
@@ -346,6 +365,7 @@ Tests are failing. Please:
 ## 📋 Template Prompts
 
 ### For Any Feature
+
 ```
 According to TECHNICAL_DOCUMENTATION.md section [X.X], implement [FEATURE]:
 
@@ -365,6 +385,7 @@ Verify against documentation when complete.
 ```
 
 ### For Bug Fixes
+
 ```
 There's a bug in [FEATURE]. According to section [X.X], it should [EXPECTED BEHAVIOR] but instead [ACTUAL BEHAVIOR].
 

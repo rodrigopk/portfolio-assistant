@@ -45,17 +45,20 @@ apps/api/
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Set up environment variables:
+
 ```bash
 cp ../../.env.example ../../.env
 # Edit .env with your configuration
 ```
 
 3. Start development server:
+
 ```bash
 npm run dev
 ```
@@ -95,6 +98,7 @@ The API will be available at `http://localhost:3001`
 See `.env.example` in the project root for all available environment variables.
 
 Key variables:
+
 - `PORT` - Server port (default: 3001)
 - `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
@@ -106,6 +110,7 @@ Key variables:
 ### Adding a New Route
 
 1. Create a route file in `src/routes/`:
+
 ```typescript
 import { Router } from 'express';
 
@@ -119,6 +124,7 @@ export default router;
 ```
 
 2. Register the route in `src/routes/index.ts`:
+
 ```typescript
 import myRouter from './myroute';
 router.use('/myroute', myRouter);
@@ -127,6 +133,7 @@ router.use('/myroute', myRouter);
 ### Adding Middleware
 
 Create middleware in `src/middleware/`:
+
 ```typescript
 import { Request, Response, NextFunction } from 'express';
 
@@ -139,6 +146,7 @@ export const myMiddleware = (req: Request, res: Response, next: NextFunction) =>
 ### Error Handling
 
 Use the `AppError` class for consistent error handling:
+
 ```typescript
 import { AppError } from '@/middleware/errorHandler';
 
@@ -146,23 +154,29 @@ throw new AppError('Something went wrong', 400, 'BAD_REQUEST');
 ```
 
 For async route handlers, use `asyncHandler`:
+
 ```typescript
 import { asyncHandler } from '@/utils/asyncHandler';
 
-router.get('/data', asyncHandler(async (req, res) => {
-  const data = await fetchData();
-  res.json(data);
-}));
+router.get(
+  '/data',
+  asyncHandler(async (req, res) => {
+    const data = await fetchData();
+    res.json(data);
+  })
+);
 ```
 
 ## Testing
 
 Run tests with:
+
 ```bash
 npm test
 ```
 
 Example test:
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 
@@ -176,11 +190,13 @@ describe('My Feature', () => {
 ## Logging
 
 The application uses Winston for logging. Logs are written to:
+
 - `logs/error.log` - Error level logs
 - `logs/combined.log` - All logs
 - Console - Development mode
 
 Example usage:
+
 ```typescript
 import { logger } from '@/utils/logger';
 
@@ -191,6 +207,7 @@ logger.error('An error occurred', { error });
 ## Security
 
 The API includes several security features:
+
 - Helmet.js for security headers
 - CORS configuration
 - Rate limiting
@@ -200,16 +217,19 @@ The API includes several security features:
 ## Production Deployment
 
 1. Build the application:
+
 ```bash
 npm run build
 ```
 
 2. Set environment to production:
+
 ```bash
 export NODE_ENV=production
 ```
 
 3. Start the server:
+
 ```bash
 npm start
 ```

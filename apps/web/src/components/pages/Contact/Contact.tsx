@@ -8,7 +8,10 @@ export function Contact() {
 
       <form className="mt-8 space-y-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Name
           </label>
           <input
@@ -20,7 +23,10 @@ export function Contact() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Email
           </label>
           <input
@@ -32,7 +38,10 @@ export function Contact() {
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="message"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Message
           </label>
           <textarea

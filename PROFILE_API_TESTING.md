@@ -9,6 +9,7 @@ This document provides testing instructions for the newly implemented GET /api/p
 The following files have been created/modified:
 
 ### Core Implementation Files:
+
 - `apps/api/prisma/schema.prisma` - Prisma schema with Profile model
 - `apps/api/src/lib/prisma.ts` - Prisma client setup
 - `apps/api/src/lib/redis.ts` - Redis client and cache utilities
@@ -20,9 +21,11 @@ The following files have been created/modified:
 - `apps/api/src/index.ts` - Updated to initialize Redis connection
 
 ### Test Files:
+
 - `apps/api/src/__tests__/profile.test.ts` - Comprehensive unit and integration tests
 
 ### Configuration:
+
 - `apps/api/package.json` - Added supertest and @types/supertest dependencies
 
 ## Features Implemented
@@ -45,6 +48,7 @@ Before testing, ensure you have:
 3. **Environment variables** configured (see `.env.example`)
 
 Required environment variables:
+
 ```bash
 DATABASE_URL=postgresql://user:password@localhost:5432/portfolio
 REDIS_URL=redis://localhost:6379
@@ -84,6 +88,7 @@ npx prisma studio
 ```
 
 Then create a Profile record with at least these fields:
+
 - fullName
 - title
 - bio
@@ -111,6 +116,7 @@ curl http://localhost:3001/api/profile
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": {
@@ -132,6 +138,7 @@ curl -v http://localhost:3001/api/profile
 ```
 
 **Expected Headers:**
+
 ```
 < HTTP/1.1 200 OK
 < Cache-Control: public, max-age=3600
@@ -162,6 +169,7 @@ curl -v http://localhost:3001/api/profile
 ```
 
 **Expected Response (404 Not Found):**
+
 ```json
 {
   "error": {
@@ -185,6 +193,7 @@ done
 After 100 requests within 15 minutes:
 
 **Expected Response (429 Too Many Requests):**
+
 ```json
 {
   "error": {
@@ -205,6 +214,7 @@ curl -H "Origin: http://localhost:3000" \
 ```
 
 **Expected Headers:**
+
 ```
 < Access-Control-Allow-Origin: http://localhost:3000
 < Access-Control-Allow-Credentials: true
@@ -315,6 +325,7 @@ Error: Failed to fetch the engine file at https://binaries.prisma.sh/...
 ```
 
 **Workaround:**
+
 - Use `PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1` environment variable
 - Or pre-generate the Prisma client in an environment with internet access
 
@@ -327,6 +338,7 @@ The current ESLint setup may show errors due to version incompatibilities betwee
 ### Redis Connection Issues
 
 If Redis is not available:
+
 - The API will start but cache operations will be skipped
 - Database queries will run on every request
 - Check Redis connection: `redis-cli ping` (should return PONG)
@@ -334,6 +346,7 @@ If Redis is not available:
 ### Database Connection Issues
 
 Check PostgreSQL connection:
+
 ```bash
 psql $DATABASE_URL -c "SELECT 1"
 ```
@@ -341,6 +354,7 @@ psql $DATABASE_URL -c "SELECT 1"
 ### Port Already in Use
 
 If port 3001 is in use:
+
 ```bash
 PORT=3002 npm run dev
 ```
@@ -378,6 +392,7 @@ const { data, isLoading } = useQuery({
 ## Next Steps
 
 After testing:
+
 1. Verify all curl commands work as expected
 2. Confirm Redis caching is functioning
 3. Check test coverage meets 80%+ requirement
@@ -414,6 +429,7 @@ curl -H "X-Forwarded-For: 192.168.1.100" http://localhost:3001/api/profile
 ## Support
 
 For issues or questions, please refer to:
+
 - TECHNICAL_DOCUMENTATION.md - Section 5.1.1 (Profile Endpoints)
 - TECHNICAL_DOCUMENTATION.md - Section 5.4 (Rate Limiting)
 - TECHNICAL_DOCUMENTATION.md - Section 5.5 (Error Handling)
