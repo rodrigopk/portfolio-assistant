@@ -3,6 +3,7 @@ import type {
   ProjectsQueryParams,
   ProjectDetail,
   ProjectFilters,
+  ProjectSummary,
 } from '../types/project';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -71,15 +72,24 @@ export const api = {
     const query = queryParams.toString();
     const endpoint = `/api/projects${query ? `?${query}` : ''}`;
 
-    return fetchApi<ProjectsListResponse>(endpoint);
+    const response = await fetchApi<{ data: ProjectSummary[]; meta: { total: number; hasMore: boolean } }>(endpoint);
+    
+    // Transform backend ApiResponse format to frontend expected format
+    return {
+      projects: response.data || [],
+      total: response.meta?.total || 0,
+      hasMore: response.meta?.hasMore || false,
+    };
   },
 
   async getProjectBySlug(slug: string): Promise<ProjectDetail> {
-    return fetchApi<ProjectDetail>(`/api/projects/${slug}`);
+    const response = await fetchApi<{ data: ProjectDetail }>(`/api/projects/${slug}`);
+    return response.data;
   },
 
   async getProjectFilters(): Promise<ProjectFilters> {
-    return fetchApi<ProjectFilters>('/api/projects/filters');
+    const response = await fetchApi<{ data: ProjectFilters }>('/api/projects/filters');
+    return response.data;
   },
 };
 
