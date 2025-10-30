@@ -1,7 +1,8 @@
 import request from 'supertest';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import app from '../app';
+import { prisma } from '../lib/prisma';
 
 describe('CORS Configuration', () => {
   describe('Allowed Origins', () => {
@@ -107,6 +108,28 @@ describe('CORS Configuration', () => {
     });
 
     it('should apply CORS to /api/profile endpoint', async () => {
+      // Mock profile data to ensure we get a 200 response for CORS testing
+      const mockProfile = {
+        id: 1,
+        fullName: 'John Doe',
+        title: 'Software Developer',
+        bio: 'Passionate developer with 5+ years of experience',
+        location: 'San Francisco, CA',
+        availability: 'Available for work',
+        skills: ['JavaScript', 'TypeScript', 'React', 'Node.js'],
+        experience: ['Software Engineer at Tech Corp', 'Frontend Developer at StartupXYZ'],
+        education: ['Computer Science Degree from State University'],
+        socialLinks: {
+          linkedin: 'https://linkedin.com/in/johndoe',
+          github: 'https://github.com/johndoe',
+          twitter: 'https://twitter.com/johndoe'
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+
       const response = await request(app)
         .get('/api/profile')
         .set('Origin', 'http://localhost:5173')
@@ -114,6 +137,9 @@ describe('CORS Configuration', () => {
 
       expect(response.headers['access-control-allow-origin']).toBe('http://localhost:5173');
       expect(response.headers['access-control-allow-credentials']).toBe('true');
+
+      // Restore the mock
+      vi.restoreAllMocks();
     });
   });
 
