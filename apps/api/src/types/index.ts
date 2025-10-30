@@ -30,3 +30,6 @@ export interface SortParams {
 export interface FilterParams {
   [key: string]: string | number | boolean | undefined;
 }
+
+// Export WebSocket types
+export * from './websocket.types';
