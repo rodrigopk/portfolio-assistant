@@ -37,9 +37,7 @@ describe('CORS Configuration', () => {
     });
 
     it('should allow requests without origin (mobile apps, Postman)', async () => {
-      const response = await request(app)
-        .get('/api/health')
-        .expect(200);
+      const response = await request(app).get('/api/health').expect(200);
 
       // Should not have CORS headers when no origin is provided, but request should succeed
       expect(response.status).toBe(200);
@@ -122,10 +120,10 @@ describe('CORS Configuration', () => {
         socialLinks: {
           linkedin: 'https://linkedin.com/in/johndoe',
           github: 'https://github.com/johndoe',
-          twitter: 'https://twitter.com/johndoe'
+          twitter: 'https://twitter.com/johndoe',
         },
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
@@ -149,7 +147,7 @@ describe('CORS Configuration', () => {
       const allowedOrigins = process.env['ALLOWED_ORIGINS']?.split(',') || [
         'http://localhost:3000',
         'http://localhost:5173', // Vite default dev port
-        'http://localhost:4173'  // Vite alternative dev port
+        'http://localhost:4173', // Vite alternative dev port
       ];
       expect(allowedOrigins).toContain('http://localhost:5173');
       expect(allowedOrigins).toContain('http://localhost:4173');

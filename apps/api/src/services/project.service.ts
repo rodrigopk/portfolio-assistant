@@ -183,10 +183,7 @@ export class ProjectService {
       const categoriesResult = await prisma.project.findMany({
         select: { category: true },
         where: {
-          AND: [
-            { category: { not: null } },
-            { category: { not: '' } }
-          ]
+          AND: [{ category: { not: null } }, { category: { not: '' } }],
         },
         distinct: ['category'],
         orderBy: { category: 'asc' },
@@ -196,13 +193,15 @@ export class ProjectService {
       const projectsWithTech = await prisma.project.findMany({
         select: { technologies: true },
         where: {
-          NOT: { technologies: { isEmpty: true } }
+          NOT: { technologies: { isEmpty: true } },
         },
       });
 
       const categories = categoriesResult
         .map((p: { category: string | null }) => p.category)
-        .filter((category: string | null): category is string => category !== null && category !== '');
+        .filter(
+          (category: string | null): category is string => category !== null && category !== ''
+        );
 
       // Flatten all technologies arrays and get unique values
       const allTechnologies: string[] = projectsWithTech.flatMap(

@@ -72,8 +72,11 @@ export const api = {
     const query = queryParams.toString();
     const endpoint = `/api/projects${query ? `?${query}` : ''}`;
 
-    const response = await fetchApi<{ data: ProjectSummary[]; meta: { total: number; hasMore: boolean } }>(endpoint);
-    
+    const response = await fetchApi<{
+      data: ProjectSummary[];
+      meta: { total: number; hasMore: boolean };
+    }>(endpoint);
+
     // Transform backend ApiResponse format to frontend expected format
     return {
       projects: response.data || [],
