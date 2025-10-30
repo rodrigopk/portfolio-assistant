@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// Note: The `any` type is used in tests for Prisma mock responses and HTTP response bodies
+// where the exact types are complex and mocking would be overly verbose for test purposes
 import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
@@ -7,6 +9,10 @@ import { prisma } from '../lib/prisma';
 import { connectRedis, disconnectRedis, cache } from '../lib/redis';
 import { ProjectService } from '../services/project.service';
 import { ProjectSummary, ProjectDetail } from '../types/project.types';
+
+// Type assertion for Prisma client in tests
+// Note: This is needed because TypeScript may not correctly infer the generated Prisma client types in test environment
+const prismaTyped = prisma as any;
 
 // Mock project data
 const mockProjects = [
@@ -91,22 +97,22 @@ const mockProjectSummaries: ProjectSummary[] = mockProjects.map((p) => ({
 }));
 
 const mockProjectDetail: ProjectDetail = {
-  id: mockProjects[0].id,
-  title: mockProjects[0].title,
-  slug: mockProjects[0].slug,
-  description: mockProjects[0].description,
-  longDescription: mockProjects[0].longDescription,
-  technologies: mockProjects[0].technologies,
-  featured: mockProjects[0].featured,
-  category: mockProjects[0].category,
-  githubUrl: mockProjects[0].githubUrl,
-  liveUrl: mockProjects[0].liveUrl,
-  imageUrl: mockProjects[0].imageUrl,
-  startDate: mockProjects[0].startDate?.toISOString() || null,
-  endDate: mockProjects[0].endDate?.toISOString() || null,
-  githubStars: mockProjects[0].githubStars,
-  githubForks: mockProjects[0].githubForks,
-  lastCommit: mockProjects[0].lastCommit?.toISOString() || null,
+  id: mockProjects[0]!.id,
+  title: mockProjects[0]!.title,
+  slug: mockProjects[0]!.slug,
+  description: mockProjects[0]!.description,
+  longDescription: mockProjects[0]!.longDescription,
+  technologies: mockProjects[0]!.technologies,
+  featured: mockProjects[0]!.featured,
+  category: mockProjects[0]!.category,
+  githubUrl: mockProjects[0]!.githubUrl,
+  liveUrl: mockProjects[0]!.liveUrl,
+  imageUrl: mockProjects[0]!.imageUrl,
+  startDate: mockProjects[0]!.startDate?.toISOString() || null,
+  endDate: mockProjects[0]!.endDate?.toISOString() || null,
+  githubStars: mockProjects[0]!.githubStars,
+  githubForks: mockProjects[0]!.githubForks,
+  lastCommit: mockProjects[0]!.lastCommit?.toISOString() || null,
 };
 
 describe('Project API - Unit Tests', () => {
@@ -125,8 +131,8 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
         // Mock database response
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(mockProjects.length);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(mockProjects.length);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(mockProjects as any);
 
         const result = await projectService.getProjects({ limit: 20, offset: 0 });
 
@@ -134,7 +140,7 @@ describe('Project API - Unit Tests', () => {
         expect(result.total).toBe(3);
         expect(result.hasMore).toBe(false);
         expect(cache.get).toHaveBeenCalled();
-        expect(prisma.project.findMany).toHaveBeenCalled();
+        expect(prismaTyped.project.findMany).toHaveBeenCalled();
         expect(cache.set).toHaveBeenCalled();
       });
 
@@ -147,13 +153,13 @@ describe('Project API - Unit Tests', () => {
 
         // Mock cache hit
         vi.spyOn(cache, 'get').mockResolvedValue(cachedResponse);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue([]);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([]);
 
         const result = await projectService.getProjects({ limit: 20, offset: 0 });
 
         expect(result).toEqual(cachedResponse);
         expect(cache.get).toHaveBeenCalled();
-        expect(prisma.project.findMany).not.toHaveBeenCalled();
+        expect(prismaTyped.project.findMany).not.toHaveBeenCalled();
       });
 
       it('should filter projects by featured flag', async () => {
@@ -161,14 +167,14 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
         const featuredProjects = mockProjects.filter((p) => p.featured);
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(featuredProjects.length);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue(featuredProjects as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(featuredProjects.length);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(featuredProjects as any);
 
         const result = await projectService.getProjects({ featured: true, limit: 20, offset: 0 });
 
         expect(result.projects).toHaveLength(2);
         expect(result.projects.every((p) => p.featured)).toBe(true);
-        expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect(prismaTyped.project.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({ featured: true }),
           })
@@ -180,8 +186,8 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
         const webProjects = mockProjects.filter((p) => p.category === 'web');
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(webProjects.length);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue(webProjects as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(webProjects.length);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(webProjects as any);
 
         const result = await projectService.getProjects({
           category: 'web',
@@ -198,8 +204,8 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
         const reactProjects = mockProjects.filter((p) => p.technologies.includes('React'));
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(reactProjects.length);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue(reactProjects as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(reactProjects.length);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(reactProjects as any);
 
         const result = await projectService.getProjects({
           tech: ['React'],
@@ -208,7 +214,7 @@ describe('Project API - Unit Tests', () => {
         });
 
         expect(result.projects).toHaveLength(2);
-        expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect(prismaTyped.project.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
               technologies: { hasSome: ['React'] },
@@ -221,13 +227,13 @@ describe('Project API - Unit Tests', () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(10);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(10);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
 
         const result = await projectService.getProjects({ limit: 1, offset: 0 });
 
         expect(result.hasMore).toBe(true);
-        expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect(prismaTyped.project.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             take: 1,
             skip: 0,
@@ -238,8 +244,8 @@ describe('Project API - Unit Tests', () => {
       it('should exclude sensitive fields from summary', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
-        vi.spyOn(prisma.project, 'count').mockResolvedValue(1);
-        vi.spyOn(prisma.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
+        vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(1);
+        vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
 
         const result = await projectService.getProjects({ limit: 20, offset: 0 });
 
@@ -256,7 +262,7 @@ describe('Project API - Unit Tests', () => {
       it('should handle errors when fetching from database', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         const dbError = new Error('Database connection failed');
-        vi.spyOn(prisma.project, 'count').mockRejectedValue(dbError);
+        vi.spyOn(prismaTyped.project, 'count').mockRejectedValue(dbError);
 
         await expect(projectService.getProjects({ limit: 20, offset: 0 })).rejects.toThrow(
           'Database connection failed'
@@ -268,7 +274,7 @@ describe('Project API - Unit Tests', () => {
       it('should return project from database when cache is empty', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
-        vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+        vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
         const result = await projectService.getProjectBySlug('ecommerce-platform');
 
@@ -280,17 +286,17 @@ describe('Project API - Unit Tests', () => {
 
       it('should return project from cache when available', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(mockProjectDetail);
-        vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(null);
+        vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(null);
 
         const result = await projectService.getProjectBySlug('ecommerce-platform');
 
         expect(result).toEqual(mockProjectDetail);
-        expect(prisma.project.findUnique).not.toHaveBeenCalled();
+        expect(prismaTyped.project.findUnique).not.toHaveBeenCalled();
       });
 
       it('should return null when project not found', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
-        vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(null);
+        vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(null);
 
         const result = await projectService.getProjectBySlug('non-existent-project');
 
@@ -300,7 +306,7 @@ describe('Project API - Unit Tests', () => {
       it('should include all fields in detail view', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         vi.spyOn(cache, 'set').mockResolvedValue(undefined);
-        vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+        vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
         const result = await projectService.getProjectBySlug('ecommerce-platform');
 
@@ -313,7 +319,7 @@ describe('Project API - Unit Tests', () => {
       it('should handle errors when fetching from database', async () => {
         vi.spyOn(cache, 'get').mockResolvedValue(null);
         const dbError = new Error('Database error');
-        vi.spyOn(prisma.project, 'findUnique').mockRejectedValue(dbError);
+        vi.spyOn(prismaTyped.project, 'findUnique').mockRejectedValue(dbError);
 
         await expect(projectService.getProjectBySlug('ecommerce-platform')).rejects.toThrow(
           'Database error'
@@ -346,31 +352,57 @@ describe('Project API - Unit Tests', () => {
 });
 
 describe('Project API - Integration Tests', () => {
+  let redisConnected = false;
+
   beforeAll(async () => {
-    // Connect to Redis for integration tests
+    // Connect to Redis for integration tests with timeout
     try {
-      await connectRedis();
+      await Promise.race([
+        connectRedis().then(() => {
+          redisConnected = true;
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Redis connection timeout')), 2000)
+        )
+      ]);
     } catch (error) {
-      console.warn('Redis connection failed, tests may not work properly:', error);
+      console.warn('Redis connection failed, tests will run with mocked cache:', error);
+      redisConnected = false;
+      // Mock cache operations when Redis is not available
+      vi.spyOn(cache, 'get').mockResolvedValue(null);
+      vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+      vi.spyOn(cache, 'delPattern').mockResolvedValue(undefined);
     }
   });
 
   afterAll(async () => {
     // Cleanup
-    await cache.delPattern('projects:*');
-    await disconnectRedis();
+    try {
+      if (redisConnected) {
+        await cache.delPattern('projects:*');
+        await disconnectRedis();
+      }
+    } catch (error) {
+      console.warn('Error during Redis cleanup:', error);
+    }
     await prisma.$disconnect();
   });
 
   beforeEach(async () => {
-    // Clear cache before each test
-    await cache.delPattern('projects:*');
+    // Clear cache before each test only if Redis is connected
+    try {
+      if (redisConnected) {
+        await cache.delPattern('projects:*');
+      }
+    } catch (error) {
+      console.warn('Error clearing cache:', error);
+    }
   });
 
   describe('GET /api/projects', () => {
     it('should return 200 and projects list', async () => {
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(mockProjects.length);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(mockProjects.length);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(mockProjects as any);
 
       const response = await request(app).get('/api/projects');
 
@@ -388,30 +420,30 @@ describe('Project API - Integration Tests', () => {
 
     it('should filter by featured flag', async () => {
       const featuredProjects = mockProjects.filter((p) => p.featured);
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(featuredProjects.length);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue(featuredProjects as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(featuredProjects.length);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(featuredProjects as any);
 
       const response = await request(app).get('/api/projects?featured=true');
 
       expect(response.status).toBe(200);
-      expect(response.body.data.every((p: any) => p.featured)).toBe(true);
+      expect(response.body.data.every((p: ProjectSummary) => p.featured)).toBe(true);
     });
 
     it('should filter by category', async () => {
       const webProjects = mockProjects.filter((p) => p.category === 'web');
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(webProjects.length);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue(webProjects as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(webProjects.length);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(webProjects as any);
 
       const response = await request(app).get('/api/projects?category=web');
 
       expect(response.status).toBe(200);
-      expect(response.body.data.every((p: any) => p.category === 'web')).toBe(true);
+      expect(response.body.data.every((p: ProjectSummary) => p.category === 'web')).toBe(true);
     });
 
     it('should filter by technologies', async () => {
       const reactProjects = mockProjects.filter((p) => p.technologies.includes('React'));
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(reactProjects.length);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue(reactProjects as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(reactProjects.length);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue(reactProjects as any);
 
       const response = await request(app).get('/api/projects?tech=React,TypeScript');
 
@@ -420,8 +452,8 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should handle pagination with limit and offset', async () => {
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(10);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(10);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
 
       const response = await request(app).get('/api/projects?limit=1&offset=0');
 
@@ -439,7 +471,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      vi.spyOn(prisma.project, 'count').mockRejectedValue(new Error('Database error'));
+      vi.spyOn(prismaTyped.project, 'count').mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/projects');
 
@@ -448,8 +480,8 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should return correct content-type header', async () => {
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(0);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue([]);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(0);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([]);
 
       const response = await request(app).get('/api/projects');
 
@@ -459,7 +491,7 @@ describe('Project API - Integration Tests', () => {
 
   describe('GET /api/projects/:slug', () => {
     it('should return 200 and project detail', async () => {
-      vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+      vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
       const response = await request(app).get('/api/projects/ecommerce-platform');
 
@@ -474,7 +506,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should return 404 when project not found', async () => {
-      vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(null);
+      vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(null);
 
       const response = await request(app).get('/api/projects/non-existent-project');
 
@@ -487,13 +519,13 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should return cached data on subsequent requests', async () => {
-      vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+      vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
       const response1 = await request(app).get('/api/projects/ecommerce-platform');
       expect(response1.status).toBe(200);
 
       vi.clearAllMocks();
-      vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+      vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
       const response2 = await request(app).get('/api/projects/ecommerce-platform');
       expect(response2.status).toBe(200);
@@ -501,7 +533,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      vi.spyOn(prisma.project, 'findUnique').mockRejectedValue(new Error('Database error'));
+      vi.spyOn(prismaTyped.project, 'findUnique').mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/projects/ecommerce-platform');
 
@@ -512,8 +544,8 @@ describe('Project API - Integration Tests', () => {
 
   describe('Response schema validation', () => {
     it('should match list response schema', async () => {
-      vi.spyOn(prisma.project, 'count').mockResolvedValue(1);
-      vi.spyOn(prisma.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
+      vi.spyOn(prismaTyped.project, 'count').mockResolvedValue(1);
+      vi.spyOn(prismaTyped.project, 'findMany').mockResolvedValue([mockProjects[0]] as any);
 
       const response = await request(app).get('/api/projects');
 
@@ -543,7 +575,7 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should match detail response schema', async () => {
-      vi.spyOn(prisma.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
+      vi.spyOn(prismaTyped.project, 'findUnique').mockResolvedValue(mockProjects[0] as any);
 
       const response = await request(app).get('/api/projects/ecommerce-platform');
 

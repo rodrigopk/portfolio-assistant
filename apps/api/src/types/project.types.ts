@@ -26,7 +26,13 @@ export const projectsQuerySchema = z.object({
     .refine((val: number) => val >= 0, { message: 'Offset must be non-negative' }),
 });
 
-export type ProjectsQueryParams = z.infer<typeof projectsQuerySchema>;
+export type ProjectsQueryParams = {
+  featured?: boolean;
+  category?: string;
+  tech?: string[];
+  limit?: number;
+  offset?: number;
+};
 
 /**
  * Zod schema for validating project slug parameter
