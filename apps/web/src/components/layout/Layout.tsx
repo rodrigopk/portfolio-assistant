@@ -1,6 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
+
+// Lazy load ChatWidget for code splitting
+const ChatWidget = lazy(() => import('../widgets/ChatWidget'));
 
 export function Layout() {
   return (
@@ -10,6 +14,11 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
+
+      {/* Lazy-loaded ChatWidget */}
+      <Suspense fallback={null}>
+        <ChatWidget />
+      </Suspense>
     </div>
   );
 }
