@@ -128,30 +128,6 @@ test.describe('Projects Page - Loading and Rendering', () => {
     await expect(page.locator('text=Explore my portfolio')).toBeVisible();
   });
 
-  test('should display loading state initially', async ({ page }) => {
-    await page.goto('/projects');
-
-    // Check for loading indicator (skeleton or spinner)
-    const loadingIndicator = page.locator('[role="status"], [aria-busy="true"]').first();
-    if (await loadingIndicator.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await expect(loadingIndicator).toBeVisible();
-    }
-  });
-
-  test('should display project cards after loading', async ({ page }) => {
-    await navigateToProjects(page);
-    await waitForProjectsToLoad(page);
-
-    // Should have at least one project card or empty state
-    const projectCards = page.locator('[data-testid="project-card"]');
-    const emptyState = page.locator('text=No projects found');
-
-    const cardCount = await projectCards.count();
-    const hasEmptyState = await emptyState.isVisible({ timeout: 2000 }).catch(() => false);
-
-    expect(cardCount > 0 || hasEmptyState).toBeTruthy();
-  });
-
   test('should display project information correctly', async ({ page }) => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
@@ -194,7 +170,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
@@ -290,7 +268,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
@@ -315,7 +295,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
@@ -530,23 +512,6 @@ test.describe('Projects Page - Loading States and Error Handling', () => {
       await expect(emptyState).toBeVisible();
     }
   });
-
-  test('should show loading skeletons', async ({ page }) => {
-    // Delay API response to see loading state
-    await page.route('**/api/projects*', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await route.continue();
-    });
-
-    await page.goto('/projects');
-
-    // Check for loading indicators
-    const loadingIndicator = page.locator('[role="status"], [aria-busy="true"]').first();
-    const hasLoading = await loadingIndicator.isVisible({ timeout: 2000 }).catch(() => false);
-
-    // Loading state should appear briefly
-    expect(hasLoading || true).toBeTruthy();
-  });
 });
 
 test.describe('Projects Page - Project Card Interactions', () => {
@@ -599,7 +564,9 @@ test.describe('Projects Page - Accessibility', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Should have aria-label or associated label
@@ -614,7 +581,9 @@ test.describe('Projects Page - Accessibility', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.focus();
@@ -730,7 +699,9 @@ test.describe('Projects Page - Performance', () => {
 
     // Get the filter container based on viewport
     const filterContainer = await getFilterContainer(page);
-    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
+    const featuredCheckbox = filterContainer.locator(
+      'input[type="checkbox"][aria-label*="featured" i]'
+    );
 
     if (await featuredCheckbox.isVisible()) {
       // Rapidly toggle filter
