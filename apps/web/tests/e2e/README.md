@@ -233,12 +233,12 @@ Example:
 
 ```typescript
 // Good - semantic and resilient
-page.locator('[role="button"][aria-label="Submit"]')
-page.getByRole('button', { name: 'Submit' })
-page.locator('[data-testid="submit-button"]')
+page.locator('[role="button"][aria-label="Submit"]');
+page.getByRole('button', { name: 'Submit' });
+page.locator('[data-testid="submit-button"]');
 
 // Avoid - fragile and implementation-dependent
-page.locator('.btn-primary.submit-btn')
+page.locator('.btn-primary.submit-btn');
 ```
 
 ## Debugging
@@ -246,11 +246,13 @@ page.locator('.btn-primary.submit-btn')
 ### Debug Failed Tests
 
 1. Run in headed mode to see browser:
+
    ```bash
    npm run test:e2e:headed
    ```
 
 2. Use debug mode with Playwright Inspector:
+
    ```bash
    npm run test:e2e:debug
    ```
@@ -263,16 +265,19 @@ page.locator('.btn-primary.submit-btn')
 ### Common Issues
 
 **Tests timeout**
+
 - Increase timeout in test or config
 - Check if API server is running
 - Verify network conditions
 
 **Flaky tests**
+
 - Add proper wait conditions
 - Use `waitForSelector` with timeout
 - Check for race conditions
 
 **Element not found**
+
 - Verify selector is correct
 - Check if element is in viewport
 - Wait for page to be fully loaded

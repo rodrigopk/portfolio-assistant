@@ -62,7 +62,16 @@ const _MOCK_PROJECTS_RESPONSE = {
 const _MOCK_FILTERS_RESPONSE = {
   data: {
     categories: ['Web Application', 'Productivity', 'Data Visualization'],
-    technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Express', 'Vue', 'JavaScript', 'D3.js'],
+    technologies: [
+      'React',
+      'TypeScript',
+      'Node.js',
+      'PostgreSQL',
+      'Express',
+      'Vue',
+      'JavaScript',
+      'D3.js',
+    ],
   },
 };
 
@@ -331,7 +340,9 @@ test.describe('Projects Page - Pagination', () => {
     await waitForProjectsToLoad(page);
 
     const nextButton = page.locator('button:has-text("Next"), button[aria-label*="next" i]');
-    const prevButton = page.locator('button:has-text("Previous"), button[aria-label*="previous" i]');
+    const prevButton = page.locator(
+      'button:has-text("Previous"), button[aria-label*="previous" i]'
+    );
 
     if (await nextButton.isVisible({ timeout: 2000 }).catch(() => false)) {
       const isDisabled = await nextButton.isDisabled();
@@ -615,7 +626,10 @@ test.describe('Projects Page - Accessibility', () => {
 
     // Look for live regions or status indicators
     const liveRegion = page.locator('[role="status"], [aria-live]');
-    const hasLiveRegion = await liveRegion.first().isVisible({ timeout: 2000 }).catch(() => false);
+    const hasLiveRegion = await liveRegion
+      .first()
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
 
     // Live regions may be present for status updates
     expect(hasLiveRegion || true).toBeTruthy();
