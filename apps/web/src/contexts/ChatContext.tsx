@@ -150,21 +150,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
   const handleOpen = useCallback(() => {
     setError(null);
-
-    // Send auth message on connection
-    if (wsRef.current) {
-      wsRef.current.sendMessage({
-        type: 'auth',
-        sessionId,
-      });
-    }
-  }, [sessionId]);
+  }, []);
 
   const handleClose = useCallback(() => {
     setIsAuthenticated(false);
   }, []);
-
-  const wsRef = React.useRef<ReturnType<typeof useWebSocket> | null>(null);
 
   const ws = useWebSocket({
     url: wsUrl,
@@ -176,7 +166,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
     maxReconnectAttempts: 5,
   });
 
-  wsRef.current = ws;
+  // Send auth message when connection is established
+  useEffect(() => {
+    if (ws.connectionStatus === 'connected' && !isAuthenticated) {
+      ws.sendMessage({
+        type: 'auth',
+        sessionId,
+      });
+    }
+  }, [ws, ws.connectionStatus, isAuthenticated, sessionId]);
 
   const sendMessage = useCallback(
     (content: string) => {
