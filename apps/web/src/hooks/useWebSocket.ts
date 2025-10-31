@@ -88,7 +88,7 @@ export function useWebSocket({
         // Attempt reconnection if enabled and under max attempts
         if (shouldReconnectRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current += 1;
-          const delay = reconnectInterval * Math.pow(2, reconnectAttemptsRef.current - 1);
+          const delay = reconnectInterval * Math.pow(2, reconnectAttemptsRef.current);
 
           clearReconnectTimeout();
           reconnectTimeoutRef.current = setTimeout(
