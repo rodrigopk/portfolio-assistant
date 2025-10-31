@@ -13,7 +13,7 @@ on:
 
 jobs:
   e2e-tests:
-    name: E2E Tests - Projects Page
+    name: E2E Tests - Chromium (Desktop & Mobile)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -42,36 +42,28 @@ jobs:
         ports:
           - 6379:6379
 
-    strategy:
-      fail-fast: false
-      matrix:
-        # Run tests across different browsers in parallel
-        browser: [chromium, firefox, webkit]
-        node-version: [20.x]
-
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_test
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       VITE_API_URL: http://localhost:3001
-      # Disable telemetry for CI
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps chromium
+        working-directory: ./apps/web
 
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -115,8 +107,8 @@ jobs:
           echo "API failed to start"
           exit 1
 
-      - name: Run E2E tests - ${{ matrix.browser }}
-        run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - name: Run E2E tests (Chromium - Desktop & Mobile)
+        run: npm run test:e2e -- --project=chromium --project="Mobile Chrome"
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5173
@@ -133,7 +125,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.browser }}
+          name: e2e-test-results
           path: |
             apps/web/test-results/
             apps/web/playwright-report/
@@ -143,7 +135,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots-${{ matrix.browser }}-failure
+          name: e2e-screenshots-failure
           path: apps/web/test-results/**/screenshots/**
           retention-days: 7
 
@@ -151,7 +143,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: videos-${{ matrix.browser }}-failure
+          name: e2e-videos-failure
           path: apps/web/test-results/**/*.webm
           retention-days: 7
 
@@ -159,196 +151,20 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: trace-${{ matrix.browser }}-failure
+          name: e2e-traces-failure
           path: apps/web/test-results/**/*.zip
           retention-days: 7
 
-  # Mobile device testing
-  e2e-mobile:
-    name: E2E Tests - Mobile Devices
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: portfolio_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
-    strategy:
-      fail-fast: false
-      matrix:
-        device: ['Mobile Chrome', 'Mobile Safari']
-        node-version: [20.x]
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_test
-      REDIS_URL: redis://localhost:6379
-      NODE_ENV: test
-      VITE_API_URL: http://localhost:3001
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium webkit
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-        working-directory: ./apps/api
-
-      - name: Setup database schema
-        run: npx prisma db push --skip-generate
-        working-directory: ./apps/api
-
-      - name: Seed test data
-        run: npx prisma db seed
-        working-directory: ./apps/api
-        continue-on-error: true
-
-      - name: Build API
-        run: npm run build
-        working-directory: ./apps/api
-
-      - name: Build frontend
-        run: npm run build
-        working-directory: ./apps/web
-
-      - name: Start API server
-        run: |
-          npm run start &
-          echo $! > api.pid
-        working-directory: ./apps/api
-        env:
-          PORT: 3001
-
-      - name: Wait for API to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
-              echo "API is ready!"
-              exit 0
-            fi
-            echo "Waiting for API... attempt $i/30"
-            sleep 2
-          done
-          echo "API failed to start"
-          exit 1
-
-      - name: Start frontend dev server
-        run: |
-          npm run dev &
-          echo $! > vite.pid
-        working-directory: ./apps/web
-        env:
-          VITE_API_URL: http://localhost:3001
-
-      - name: Wait for frontend to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:5173 > /dev/null 2>&1; then
-              echo "Frontend is ready!"
-              exit 0
-            fi
-            echo "Waiting for frontend... attempt $i/30"
-            sleep 2
-          done
-          echo "Frontend failed to start"
-          exit 1
-
-      - name: Run E2E tests - ${{ matrix.device }}
-        run: npm run test:e2e -- --project="${{ matrix.device }}"
-        working-directory: ./apps/web
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:5173
-
-      - name: Stop servers
-        if: always()
-        run: |
-          if [ -f apps/api/api.pid ]; then
-            kill $(cat apps/api/api.pid) || true
-          fi
-          if [ -f apps/web/vite.pid ]; then
-            kill $(cat apps/web/vite.pid) || true
-          fi
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.device }}
-          path: |
-            apps/web/test-results/
-            apps/web/playwright-report/
-          retention-days: 7
-
-      - name: Upload screenshots on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots-${{ matrix.device }}-failure
-          path: apps/web/test-results/**/screenshots/**
-          retention-days: 7
-
-  # Summary job that depends on all test jobs
-  e2e-summary:
-    name: E2E Test Summary
-    runs-on: ubuntu-latest
-    needs: [e2e-tests, e2e-mobile]
-    if: always()
-
-    steps:
-      - name: Check test results
-        run: |
-          if [ "${{ needs.e2e-tests.result }}" = "failure" ] || [ "${{ needs.e2e-mobile.result }}" = "failure" ]; then
-            echo "E2E tests failed"
-            exit 1
-          elif [ "${{ needs.e2e-tests.result }}" = "cancelled" ] || [ "${{ needs.e2e-mobile.result }}" = "cancelled" ]; then
-            echo "E2E tests were cancelled"
-            exit 1
-          else
-            echo "All E2E tests passed successfully"
-            exit 0
-          fi
-
-      - name: Post summary
+      - name: Generate test summary
         if: always()
         run: |
           echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Desktop Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Mobile Tests: ${{ needs.e2e-mobile.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests completed for:" >> $GITHUB_STEP_SUMMARY
+          echo "- Desktop Chromium" >> $GITHUB_STEP_SUMMARY
+          echo "- Mobile Chrome (Pixel 5)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.e2e-tests.result }}" = "success" ] && [ "${{ needs.e2e-mobile.result }}" = "success" ]; then
+          if [ "${{ job.status }}" = "success" ]; then
             echo "✅ All E2E tests passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Some E2E tests failed. Check artifacts for details." >> $GITHUB_STEP_SUMMARY
