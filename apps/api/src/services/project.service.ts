@@ -6,6 +6,7 @@ import {
   ProjectDetail,
   ProjectsListResponse,
   ProjectFilters,
+  Project,
 } from '../types/project.types';
 import { logger } from '../utils/logger';
 
@@ -70,8 +71,7 @@ export class ProjectService {
       });
 
       // Transform to summary format
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const projectSummaries: ProjectSummary[] = projects.map((project: any) => ({
+      const projectSummaries: ProjectSummary[] = projects.map((project: Project) => ({
         id: project.id,
         title: project.title,
         slug: project.slug,
