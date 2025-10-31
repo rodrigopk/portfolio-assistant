@@ -638,7 +638,7 @@ test.describe('Projects Page - Accessibility', () => {
       .catch(() => false);
 
     // Live regions may be present for status updates
-    expect(hasLiveRegion || true).toBeTruthy();
+    expect(hasLiveRegion).toBeTruthy();
   });
 
   test('should announce errors to screen readers', async ({ page }) => {
