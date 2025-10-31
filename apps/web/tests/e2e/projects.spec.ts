@@ -664,7 +664,7 @@ test.describe('Projects Page - Accessibility', () => {
 
     // Should also have aria-live for screen readers
     const ariaLive = await errorAlert.getAttribute('aria-live');
-    expect(ariaLive).toBeTruthy();
+    expect(ariaLive).toMatch(/^(assertive|polite)$/);
   });
 
   test('should be navigable with Tab key', async ({ page }) => {
