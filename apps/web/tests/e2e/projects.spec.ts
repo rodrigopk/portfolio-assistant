@@ -87,8 +87,17 @@ async function navigateToProjects(page: Page) {
  * Helper function to wait for projects to load
  */
 async function waitForProjectsToLoad(page: Page) {
-  // Wait for either loading state to disappear or projects to appear
-  await page.waitForSelector('[data-testid="project-card"], [role="status"]', { timeout: 10000 });
+  // Wait for network to be idle after navigation
+  await page.waitForLoadState('networkidle');
+
+  // Give a moment for React to render
+  await page.waitForTimeout(500);
+
+  // Ensure loading states have resolved
+  const loadingIndicator = page.locator('[role="status"][aria-busy="true"]');
+  if (await loadingIndicator.isVisible().catch(() => false)) {
+    await loadingIndicator.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  }
 }
 
 /**
