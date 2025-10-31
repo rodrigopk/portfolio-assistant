@@ -23,6 +23,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <article
       className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
       aria-label={`Project: ${title}`}
+      data-testid="project-card"
     >
       {/* Featured Badge */}
       {featured && (
