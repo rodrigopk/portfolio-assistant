@@ -223,7 +223,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const reconnect = useCallback(() => {
     setError(null);
     ws.reconnect();
-  }, [ws]);
+  }, [ws.reconnect]);
 
   // Ping interval to keep connection alive
   const { connectionStatus, sendMessage } = ws;
