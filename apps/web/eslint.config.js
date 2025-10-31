@@ -24,7 +24,51 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'import',
+          format: ['camelCase', 'PascalCase'],
+        },
+        {
+          selector: 'typeLike',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'enumMember',
+          format: ['UPPER_CASE'],
+        },
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'],
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'property',
+          format: null,
+        },
+        {
+          selector: 'objectLiteralMethod',
+          format: ['camelCase', 'PascalCase'],
+        },
+      ],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },

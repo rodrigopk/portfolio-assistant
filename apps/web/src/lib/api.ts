@@ -8,6 +8,10 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+/**
+ * Custom error class for API errors
+ * Extends Error to include HTTP status and error code
+ */
 class ApiError extends Error {
   constructor(message: string, status: number, code?: string) {
     super(message);
@@ -19,6 +23,16 @@ class ApiError extends Error {
   code?: string;
 }
 
+/**
+ * Generic fetch wrapper for API calls
+ * Handles request formatting, response parsing, and error handling
+ *
+ * @template T - The expected response type
+ * @param endpoint - The API endpoint path (e.g., '/api/projects')
+ * @param options - Optional fetch request options
+ * @returns Promise resolving to the parsed response data
+ * @throws {ApiError} When the API request fails
+ */
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -49,7 +63,17 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   }
 }
 
+/**
+ * API client for interacting with the backend
+ * Provides methods for fetching projects, project details, and filter options
+ */
 export const api = {
+  /**
+   * Fetch a list of projects with optional filtering and pagination
+   *
+   * @param params - Optional query parameters for filtering and pagination
+   * @returns Promise resolving to projects list with metadata
+   */
   async getProjects(params?: ProjectsQueryParams): Promise<ProjectsListResponse> {
     const queryParams = new URLSearchParams();
 
@@ -85,11 +109,22 @@ export const api = {
     };
   },
 
+  /**
+   * Fetch detailed information for a specific project
+   *
+   * @param slug - The unique slug identifier for the project
+   * @returns Promise resolving to project details
+   */
   async getProjectBySlug(slug: string): Promise<ProjectDetail> {
     const response = await fetchApi<{ data: ProjectDetail }>(`/api/projects/${slug}`);
     return response.data;
   },
 
+  /**
+   * Fetch available filter options (categories and technologies)
+   *
+   * @returns Promise resolving to unique categories and technologies
+   */
   async getProjectFilters(): Promise<ProjectFilters> {
     const response = await fetchApi<{ data: ProjectFilters }>('/api/projects/filters');
     return response.data;
