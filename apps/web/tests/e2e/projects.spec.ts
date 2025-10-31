@@ -91,6 +91,23 @@ async function waitForProjectsToLoad(page: Page) {
   await page.waitForSelector('[data-testid="project-card"], [role="status"]', { timeout: 10000 });
 }
 
+/**
+ * Helper function to get the filter container based on viewport
+ * Returns the appropriate filter container (desktop sidebar or mobile details)
+ */
+async function getFilterContainer(page: Page) {
+  const viewport = page.viewportSize();
+  const isMobile = viewport && viewport.width < 1024; // lg breakpoint
+
+  if (isMobile) {
+    // Mobile: filters are in a details element
+    return page.locator('details:has-text("Filters")');
+  } else {
+    // Desktop: filters are in aside sidebar
+    return page.locator('aside[aria-label="Project filters"]');
+  }
+}
+
 test.describe('Projects Page - Loading and Rendering', () => {
   test('should load the projects page successfully', async ({ page }) => {
     await navigateToProjects(page);
@@ -166,8 +183,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Find and click featured checkbox
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
@@ -185,8 +203,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Find category filter section
-    const categorySection = page.locator('[role="group"][aria-label*="category" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const categorySection = filterContainer.locator('[role="group"][aria-label*="category" i]');
 
     if (await categorySection.isVisible()) {
       const categoryButtons = categorySection.locator('button');
@@ -209,8 +228,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Find technology filter section
-    const techSection = page.locator('[role="group"][aria-label*="technology" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const techSection = filterContainer.locator('[role="group"][aria-label*="technology" i]');
 
     if (await techSection.isVisible()) {
       const techButtons = techSection.locator('button');
@@ -233,7 +253,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    const techSection = page.locator('[role="group"][aria-label*="technology" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const techSection = filterContainer.locator('[role="group"][aria-label*="technology" i]');
 
     if (await techSection.isVisible()) {
       const techButtons = techSection.locator('button');
@@ -257,15 +279,16 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Apply a filter first
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
       await page.waitForTimeout(300);
 
-      // Find and click clear button
-      const clearButton = page.locator('button:has-text("Clear all")');
+      // Find and click clear button (scoped to filter container)
+      const clearButton = filterContainer.locator('button:has-text("Clear all")');
 
       if (await clearButton.isVisible()) {
         await clearButton.click();
@@ -281,8 +304,9 @@ test.describe('Projects Page - Filtering Functionality', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Apply a filter
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.check();
@@ -564,8 +588,9 @@ test.describe('Projects Page - Accessibility', () => {
   test('should have accessible filter controls', async ({ page }) => {
     await navigateToProjects(page);
 
-    // Featured checkbox should have label
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Should have aria-label or associated label
@@ -578,8 +603,9 @@ test.describe('Projects Page - Accessibility', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    // Featured checkbox should be keyboard accessible
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible()) {
       await featuredCheckbox.focus();
@@ -594,7 +620,9 @@ test.describe('Projects Page - Accessibility', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    const categorySection = page.locator('[role="group"][aria-label*="category" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const categorySection = filterContainer.locator('[role="group"][aria-label*="category" i]');
 
     if (await categorySection.isVisible()) {
       const categoryButton = categorySection.locator('button').first();
@@ -691,7 +719,9 @@ test.describe('Projects Page - Performance', () => {
     await navigateToProjects(page);
     await waitForProjectsToLoad(page);
 
-    const featuredCheckbox = page.locator('input[type="checkbox"][aria-label*="featured" i]');
+    // Get the filter container based on viewport
+    const filterContainer = await getFilterContainer(page);
+    const featuredCheckbox = filterContainer.locator('input[type="checkbox"][aria-label*="featured" i]');
 
     if (await featuredCheckbox.isVisible()) {
       // Rapidly toggle filter
