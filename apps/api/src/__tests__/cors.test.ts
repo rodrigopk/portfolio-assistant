@@ -8,7 +8,7 @@ describe('CORS Configuration', () => {
   describe('Allowed Origins', () => {
     it('should allow requests from localhost:3000', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'http://localhost:3000')
         .expect(200);
 
@@ -18,7 +18,7 @@ describe('CORS Configuration', () => {
 
     it('should allow requests from localhost:5173 (Vite default)', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'http://localhost:5173')
         .expect(200);
 
@@ -28,7 +28,7 @@ describe('CORS Configuration', () => {
 
     it('should allow requests from localhost:4173 (Vite alternative)', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'http://localhost:4173')
         .expect(200);
 
@@ -37,7 +37,7 @@ describe('CORS Configuration', () => {
     });
 
     it('should allow requests without origin (mobile apps, Postman)', async () => {
-      const response = await request(app).get('/api/health').expect(200);
+      const response = await request(app).get('/api/health/live').expect(200);
 
       // Should not have CORS headers when no origin is provided, but request should succeed
       expect(response.status).toBe(200);
@@ -47,7 +47,7 @@ describe('CORS Configuration', () => {
   describe('Rejected Origins', () => {
     it('should reject requests from unauthorized origins', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'http://malicious-site.com')
         .expect(500);
 
@@ -56,7 +56,7 @@ describe('CORS Configuration', () => {
 
     it('should reject requests from localhost with different port', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'http://localhost:8080')
         .expect(500);
 
@@ -65,7 +65,7 @@ describe('CORS Configuration', () => {
 
     it('should reject requests from non-localhost domains', async () => {
       const response = await request(app)
-        .get('/api/health')
+        .get('/api/health/live')
         .set('Origin', 'https://example.com')
         .expect(500);
 

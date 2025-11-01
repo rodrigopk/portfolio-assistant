@@ -1,0 +1,27 @@
+# Dockerfile for database migration service
+FROM node:20-alpine
+
+# Install PostgreSQL client for backup functionality
+RUN apk add --no-cache postgresql-client
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY packages/database/package*.json ./packages/database/
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy database package
+COPY packages/database ./packages/database
+
+# Make scripts executable
+RUN chmod +x ./packages/database/scripts/*.sh
+
+# Set default working directory to database package
+WORKDIR /app/packages/database
+
+# Default command
+CMD ["npm", "run", "db:migrate:deploy"]

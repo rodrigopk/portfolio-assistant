@@ -1,0 +1,145 @@
+name: Database Migration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/database/prisma/**'
+      - 'packages/database/scripts/**'
+      - '.github/workflows/migrate.yml'
+  
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      dry_run:
+        description: 'Perform dry run'
+        required: false
+        default: true
+        type: boolean
+      force:
+        description: 'Force migration'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  migrate:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    
+    # Only run on main branch or manual dispatch
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    
+    environment: 
+      name: ${{ github.event.inputs.environment || 'staging' }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: portfolio_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/database
+          npm ci
+          
+      - name: Setup PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+      - name: Set environment variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "MIGRATION_ENV=${{ github.event.inputs.environment || 'staging' }}" >> $GITHUB_ENV
+          
+      - name: Validate schema
+        run: |
+          cd packages/database
+          npx prisma validate --schema=./prisma/schema.prisma
+          
+      - name: Check migration status
+        run: |
+          cd packages/database
+          npx prisma migrate status --schema=./prisma/schema.prisma
+          
+      - name: Generate Prisma client
+        run: |
+          cd packages/database
+          npx prisma generate --schema=./prisma/schema.prisma
+          
+      - name: Run migrations (Dry Run)
+        if: github.event.inputs.dry_run == 'true' || github.event_name == 'push'
+        run: |
+          cd packages/database
+          ./scripts/migrate-production.sh \
+            --dry-run \
+            --environment "${{ env.MIGRATION_ENV }}"
+            
+      - name: Run migrations (Production)
+        if: github.event.inputs.dry_run == 'false' && github.event_name == 'workflow_dispatch'
+        run: |
+          cd packages/database
+          ./scripts/migrate-production.sh \
+            --environment "${{ env.MIGRATION_ENV }}" \
+            ${{ github.event.inputs.force == 'true' && '--force' || '' }}
+            
+      - name: Verify migration
+        run: |
+          cd packages/database
+          npx prisma migrate status --schema=./prisma/schema.prisma
+          
+      - name: Upload migration artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-logs-${{ github.run_id }}
+          path: |
+            packages/database/*.log
+            packages/database/backup_*.sql
+          retention-days: 30
+          
+      - name: Notify on failure
+        if: failure() && github.event.inputs.environment == 'production'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Production Migration Failed',
+              body: `Production database migration failed for commit ${context.sha}.\n\n` +
+                    `Workflow: ${context.workflow}\n` +
+                    `Run ID: ${context.runId}\n` +
+                    `Environment: ${{ github.event.inputs.environment }}\n\n` +
+                    `Please check the workflow logs and migration artifacts.`,
+              labels: ['bug', 'database', 'production']
+            })

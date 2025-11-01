@@ -491,7 +491,62 @@ User question: ${userMessage}
 
 ## 4. Database Schema
 
-### 4.1 Prisma Schema Overview
+### 4.1 Shared Database Architecture
+
+The application uses a shared database package (`@portfolio/database`) that provides centralized database management across all applications in the monorepo. This approach ensures consistency, reduces duplication, and provides advanced features like connection pooling and monitoring.
+
+#### Key Features:
+
+- **Unified Prisma Client** - Single source of truth for database schema
+- **Connection Pooling** - Environment-optimized connection management
+- **Health Monitoring** - Real-time database performance metrics
+- **Migration Management** - Production-ready deployment workflows
+- **Type Safety** - Shared TypeScript types across all applications
+
+#### Package Structure:
+
+```
+packages/database/
+├── src/
+│   ├── index.ts              # Main exports
+│   ├── connection.ts         # Connection pooling logic
+│   ├── config.ts            # Environment configuration
+│   ├── monitoring.ts        # Health checks and metrics
+│   └── generated/           # Generated Prisma client
+├── prisma/
+│   ├── schema.prisma        # Database schema
+│   ├── seed.ts             # Seed data
+│   └── migrations/         # Migration history
+├── scripts/
+│   ├── migrate-production.sh  # Production migration script
+│   └── init-db.sql           # Database initialization
+├── env/
+│   ├── .env.development      # Development configuration
+│   ├── .env.staging         # Staging configuration
+│   └── .env.production      # Production configuration
+└── README.md               # Package documentation
+```
+
+### 4.2 Connection Pooling Configuration
+
+The database package implements sophisticated connection pooling optimized for different environments:
+
+| Environment | Max Connections | Idle Timeout | Max Lifetime | SSL Mode |
+| ----------- | --------------- | ------------ | ------------ | -------- |
+| Development | 10              | 60s          | 60min        | prefer   |
+| Staging     | 20              | 30s          | 30min        | prefer   |
+| Production  | 50              | 15s          | 15min        | require  |
+
+### 4.3 Database Monitoring
+
+Built-in monitoring provides real-time insights:
+
+- **Connection Pool Metrics**: Active/idle connection counts, utilization percentage
+- **Performance Metrics**: Query response times, connection health
+- **Error Tracking**: Connection failures, query errors, timeout incidents
+- **Health Checks**: `/api/health/database` endpoint for monitoring systems
+
+### 4.4 Prisma Schema Overview
 
 The database schema is designed to support all portfolio features while maintaining referential integrity and query performance. Below is the complete Prisma schema definition.
 
