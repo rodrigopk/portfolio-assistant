@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import type { Message, ServerMessage, ConnectionStatus } from '../types/chat';
 
@@ -27,7 +27,7 @@ interface ChatContextValue {
   isTyping: boolean;
 }
 
-const ChatContext = createContext<ChatContextValue | null>(null);
+export const ChatContext = createContext<ChatContextValue | null>(null);
 
 function generateSessionId(): string {
   // Generate a UUID v4
@@ -249,12 +249,4 @@ export function ChatProvider({ children }: ChatProviderProps) {
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
-}
-
-export function useChat() {
-  const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error('useChat must be used within a ChatProvider');
-  }
-  return context;
 }

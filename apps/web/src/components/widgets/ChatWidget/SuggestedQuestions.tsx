@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useChat } from '../../../contexts/ChatContext';
+import { useChat } from '../../../hooks/useChat';
 
 const SUGGESTED_QUESTIONS = [
   'What projects have you worked on?',
