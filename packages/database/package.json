@@ -1,0 +1,49 @@
+{
+  "name": "@portfolio/database",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Shared database package with Prisma client and schema",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/generated/client/index.d.ts",
+      "import": "./dist/generated/client/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run db:generate && tsc",
+    "dev": "npm run db:generate && tsc --watch",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist node_modules/.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "prisma": "^5.7.0",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  }
+}

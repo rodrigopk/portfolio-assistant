@@ -1,20 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatAgent } from '../chat-agent';
 import Anthropic from '@anthropic-ai/sdk';
+import { loadConversationHistory, saveConversation } from '../utils/conversation-store';
 
 // Mock dependencies
 vi.mock('@anthropic-ai/sdk');
 
-const mockPrismaClient = {
-  conversation: {
-    findUnique: vi.fn(),
-    upsert: vi.fn(),
-  },
-};
-
-vi.mock('../lib/prisma', () => ({
-  getPrismaClient: vi.fn(() => mockPrismaClient),
-  disconnectPrisma: vi.fn(),
+// Mock conversation store functions
+vi.mock('../utils/conversation-store', () => ({
+  loadConversationHistory: vi.fn(),
+  saveConversation: vi.fn(),
 }));
 
 describe('ChatAgent', () => {
@@ -23,6 +18,10 @@ describe('ChatAgent', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Set up default mocks for conversation store
+    vi.mocked(loadConversationHistory).mockResolvedValue([]);
+    vi.mocked(saveConversation).mockResolvedValue();
 
     // Mock Anthropic API
     mockAnthropicCreate = vi.fn();

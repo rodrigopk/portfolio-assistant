@@ -17,8 +17,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@portfolio/agents": "*",
-    "@prisma/client": "^5.7.0",
+    "@portfolio/agents": "file:../../packages/agents",
+    "@portfolio/database": "file:../../packages/database",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.0",
     "compression": "^1.7.4",
