@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "build": "npm run db:generate && tsc && cp -r src/generated dist/",
+    "build": "npm run db:generate && tsc --build && cp -r src/generated dist/",
     "dev": "npm run db:generate && tsc --watch",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

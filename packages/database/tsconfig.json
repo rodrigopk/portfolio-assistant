@@ -11,6 +11,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
+    "composite": true,
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+    "composite": true,
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
@@ -13,6 +14,7 @@
       "@/utils/*": ["./utils/*"]
     }
   },
+  "references": [{ "path": "../../packages/database" }, { "path": "../../packages/agents" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "**/__tests__/**", "**/*.test.ts"]
 }
