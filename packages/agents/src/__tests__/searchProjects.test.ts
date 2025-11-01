@@ -1,24 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 import { searchProjects } from '../tools/searchProjects';
 
-// Mock PrismaClient
-vi.mock('@prisma/client', () => {
-  const mockPrismaClient = {
-    project: {
-      findMany: vi.fn(),
-    },
-  };
-  return {
-    PrismaClient: vi.fn(() => mockPrismaClient),
-  };
-});
+const mockPrismaClient = {
+  project: {
+    findMany: vi.fn(),
+  },
+};
+
+// Mock getPrismaClient
+vi.mock('../lib/prisma', () => ({
+  getPrismaClient: vi.fn(() => mockPrismaClient),
+}));
 
 describe('searchProjects', () => {
-  let prisma: PrismaClient;
-
   beforeEach(() => {
-    prisma = new PrismaClient();
     vi.clearAllMocks();
   });
 
@@ -37,14 +32,14 @@ describe('searchProjects', () => {
       },
     ];
 
-    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockResolvedValue(mockProjects);
 
     const result = await searchProjects({ query: 'React' });
 
     expect(result.success).toBe(true);
     expect(result.projects).toEqual(mockProjects);
     expect(result.count).toBe(1);
-    expect(prisma.project.findMany).toHaveBeenCalledWith({
+    expect(mockPrismaClient.project.findMany).toHaveBeenCalledWith({
       where: {
         OR: [
           { title: { contains: 'React', mode: 'insensitive' } },
@@ -83,7 +78,7 @@ describe('searchProjects', () => {
       },
     ];
 
-    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockResolvedValue(mockProjects);
 
     const result = await searchProjects({ technologies: ['TypeScript'] });
 
@@ -94,7 +89,7 @@ describe('searchProjects', () => {
 
   it('should combine query and technology filters', async () => {
     const mockProjects = [];
-    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockResolvedValue(mockProjects);
 
     const result = await searchProjects({
       query: 'portfolio',
@@ -121,7 +116,7 @@ describe('searchProjects', () => {
       },
     ];
 
-    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockResolvedValue(mockProjects);
 
     const result = await searchProjects({});
 
@@ -130,7 +125,7 @@ describe('searchProjects', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    vi.spyOn(prisma.project, 'findMany').mockRejectedValue(new Error('Database error'));
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockRejectedValue(new Error('Database error'));
 
     const result = await searchProjects({ query: 'test' });
 
@@ -153,12 +148,12 @@ describe('searchProjects', () => {
       featured: false,
     }));
 
-    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+    vi.spyOn(mockPrismaClient.project, 'findMany').mockResolvedValue(mockProjects);
 
     const result = await searchProjects({ query: 'Project' });
 
     expect(result.projects.length).toBeLessThanOrEqual(10);
-    expect(prisma.project.findMany).toHaveBeenCalledWith(
+    expect(mockPrismaClient.project.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ take: 10 })
     );
   });

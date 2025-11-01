@@ -1,31 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 import { checkAvailability } from '../tools/checkAvailability';
 import { Decimal } from '@prisma/client/runtime/library';
 
-// Mock PrismaClient
-vi.mock('@prisma/client', () => {
-  const mockPrismaClient = {
-    profile: {
-      findFirst: vi.fn(),
-    },
-  };
-  return {
-    PrismaClient: vi.fn(() => mockPrismaClient),
-    Decimal: class MockDecimal {
-      value: number;
-      constructor(value: number) {
-        this.value = value;
-      }
-    },
-  };
-});
+const mockPrismaClient = {
+  profile: {
+    findFirst: vi.fn(),
+  },
+};
+
+// Mock getPrismaClient
+vi.mock('../lib/prisma', () => ({
+  getPrismaClient: vi.fn(() => mockPrismaClient),
+}));
 
 describe('checkAvailability', () => {
-  let prisma: PrismaClient;
-
   beforeEach(() => {
-    prisma = new PrismaClient();
     vi.clearAllMocks();
   });
 
@@ -36,7 +25,7 @@ describe('checkAvailability', () => {
       fullName: 'Rodrigo Vasconcelos de Barros',
     };
 
-    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockResolvedValue(mockProfile);
 
     const result = await checkAvailability({});
 
@@ -53,7 +42,7 @@ describe('checkAvailability', () => {
       fullName: 'Rodrigo Vasconcelos de Barros',
     };
 
-    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockResolvedValue(mockProfile);
 
     const result = await checkAvailability({});
 
@@ -70,7 +59,7 @@ describe('checkAvailability', () => {
       fullName: 'Rodrigo Vasconcelos de Barros',
     };
 
-    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockResolvedValue(mockProfile);
 
     const result = await checkAvailability({});
 
@@ -87,7 +76,7 @@ describe('checkAvailability', () => {
       fullName: 'Rodrigo Vasconcelos de Barros',
     };
 
-    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockResolvedValue(mockProfile);
 
     const result = await checkAvailability({});
 
@@ -96,7 +85,7 @@ describe('checkAvailability', () => {
   });
 
   it('should return error when profile not found', async () => {
-    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(null);
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockResolvedValue(null);
 
     const result = await checkAvailability({});
 
@@ -106,7 +95,7 @@ describe('checkAvailability', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    vi.spyOn(prisma.profile, 'findFirst').mockRejectedValue(new Error('Database error'));
+    vi.spyOn(mockPrismaClient.profile, 'findFirst').mockRejectedValue(new Error('Database error'));
 
     const result = await checkAvailability({});
 

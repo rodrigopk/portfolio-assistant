@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../lib/prisma';
 
 export const searchProjectsSchema = z.object({
   query: z.string().optional().describe('Search query for project title or description'),
@@ -14,6 +12,7 @@ export async function searchProjects(input: SearchProjectsInput) {
   const { query, technologies } = input;
 
   try {
+    const prisma = getPrismaClient();
     const whereConditions: Record<string, unknown>[] = [];
 
     if (query) {

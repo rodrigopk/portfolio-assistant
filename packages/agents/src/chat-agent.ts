@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { PrismaClient } from '@prisma/client';
 import {
   searchProjects,
   searchProjectsTool,
@@ -12,8 +11,8 @@ import {
   suggestProposal,
   suggestProposalTool,
 } from './tools';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from './lib/prisma';
+import { logger } from './lib/logger';
 
 export const CHAT_SYSTEM_PROMPT = `You are an AI assistant representing Rodrigo Vasconcelos de Barros, a Senior Software Engineer with 8+ years of experience.
 
@@ -67,6 +66,7 @@ export class ChatAgent {
    */
   private async loadConversationHistory(sessionId: string): Promise<Message[]> {
     try {
+      const prisma = getPrismaClient();
       const conversation = await prisma.conversation.findUnique({
         where: { sessionId },
       });
@@ -79,7 +79,7 @@ export class ChatAgent {
       const messages = (conversation.messages as Message[]) || [];
       return messages.slice(-this.maxMessages);
     } catch (error) {
-      console.error('Error loading conversation history:', error);
+      logger.error('Error loading conversation history:', error);
       return [];
     }
   }
@@ -93,6 +93,7 @@ export class ChatAgent {
     metadata?: Record<string, unknown>
   ): Promise<void> {
     try {
+      const prisma = getPrismaClient();
       await prisma.conversation.upsert({
         where: { sessionId },
         create: {
@@ -107,7 +108,7 @@ export class ChatAgent {
         },
       });
     } catch (error) {
-      console.error('Error saving conversation:', error);
+      logger.error('Error saving conversation:', error);
       throw error;
     }
   }
@@ -249,15 +250,20 @@ export class ChatAgent {
       };
     } catch (error) {
       // Handle errors according to section 3.8
-      if (error instanceof Anthropic.APIError) {
-        if (error.status === 429) {
+      // Check for status property (works for both real and mocked APIError)
+      const isAPIError = error instanceof Anthropic.APIError || (error && typeof error === 'object' && 'status' in error);
+
+      if (isAPIError) {
+        const status = (error as { status?: number }).status;
+
+        if (status === 429) {
           // Rate limiting
           return {
             response:
               "I'm experiencing high demand right now. Please try again in a moment. In the meantime, feel free to explore the portfolio or contact Rodrigo directly.",
             sessionId,
           };
-        } else if (error.status === 503) {
+        } else if (status === 503) {
           // Service unavailable
           return {
             response:
@@ -267,7 +273,7 @@ export class ChatAgent {
         }
       }
 
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
       return {
         response:
           "I encountered an error processing your message. Please try rephrasing your question, or contact Rodrigo directly for assistance.",
@@ -380,7 +386,7 @@ export class ChatAgent {
       });
       await this.saveConversation(sessionId, history, metadata);
     } catch (error) {
-      console.error('Chat stream error:', error);
+      logger.error('Chat stream error:', error);
       yield "I'm sorry, I encountered an error. Please try again.";
     }
   }

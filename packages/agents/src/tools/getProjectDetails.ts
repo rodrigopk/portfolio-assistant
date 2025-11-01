@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../lib/prisma';
 
 export const getProjectDetailsSchema = z.object({
   projectId: z.string().describe('The ID or slug of the project to retrieve'),
@@ -13,6 +11,7 @@ export async function getProjectDetails(input: GetProjectDetailsInput) {
   const { projectId } = input;
 
   try {
+    const prisma = getPrismaClient();
     // Try to find by ID first, then by slug
     const project = await prisma.project.findFirst({
       where: {

@@ -1,24 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 import { getProjectDetails } from '../tools/getProjectDetails';
 
-// Mock PrismaClient
-vi.mock('@prisma/client', () => {
-  const mockPrismaClient = {
-    project: {
-      findFirst: vi.fn(),
-    },
-  };
-  return {
-    PrismaClient: vi.fn(() => mockPrismaClient),
-  };
-});
+const mockPrismaClient = {
+  project: {
+    findFirst: vi.fn(),
+  },
+};
+
+// Mock getPrismaClient
+vi.mock('../lib/prisma', () => ({
+  getPrismaClient: vi.fn(() => mockPrismaClient),
+}));
 
 describe('getProjectDetails', () => {
-  let prisma: PrismaClient;
-
   beforeEach(() => {
-    prisma = new PrismaClient();
     vi.clearAllMocks();
   });
 
@@ -45,13 +40,13 @@ describe('getProjectDetails', () => {
       updatedAt: new Date(),
     };
 
-    vi.spyOn(prisma.project, 'findFirst').mockResolvedValue(mockProject);
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockResolvedValue(mockProject);
 
     const result = await getProjectDetails({ projectId: '123' });
 
     expect(result.success).toBe(true);
     expect(result.project).toEqual(mockProject);
-    expect(prisma.project.findFirst).toHaveBeenCalledWith({
+    expect(mockPrismaClient.project.findFirst).toHaveBeenCalledWith({
       where: {
         OR: [{ id: '123' }, { slug: '123' }],
       },
@@ -81,13 +76,13 @@ describe('getProjectDetails', () => {
       updatedAt: new Date(),
     };
 
-    vi.spyOn(prisma.project, 'findFirst').mockResolvedValue(mockProject);
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockResolvedValue(mockProject);
 
     const result = await getProjectDetails({ projectId: 'slugged-project' });
 
     expect(result.success).toBe(true);
     expect(result.project).toEqual(mockProject);
-    expect(prisma.project.findFirst).toHaveBeenCalledWith({
+    expect(mockPrismaClient.project.findFirst).toHaveBeenCalledWith({
       where: {
         OR: [{ id: 'slugged-project' }, { slug: 'slugged-project' }],
       },
@@ -95,7 +90,7 @@ describe('getProjectDetails', () => {
   });
 
   it('should return error when project not found', async () => {
-    vi.spyOn(prisma.project, 'findFirst').mockResolvedValue(null);
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockResolvedValue(null);
 
     const result = await getProjectDetails({ projectId: 'nonexistent' });
 
@@ -105,7 +100,7 @@ describe('getProjectDetails', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    vi.spyOn(prisma.project, 'findFirst').mockRejectedValue(new Error('Connection timeout'));
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockRejectedValue(new Error('Connection timeout'));
 
     const result = await getProjectDetails({ projectId: '123' });
 
@@ -115,7 +110,7 @@ describe('getProjectDetails', () => {
   });
 
   it('should handle empty projectId', async () => {
-    vi.spyOn(prisma.project, 'findFirst').mockResolvedValue(null);
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockResolvedValue(null);
 
     const result = await getProjectDetails({ projectId: '' });
 

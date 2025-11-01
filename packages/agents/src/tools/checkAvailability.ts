@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../lib/prisma';
 
 export const checkAvailabilitySchema = z.object({});
 
@@ -9,6 +7,7 @@ export type CheckAvailabilityInput = z.infer<typeof checkAvailabilitySchema>;
 
 export async function checkAvailability(_input: CheckAvailabilityInput) {
   try {
+    const prisma = getPrismaClient();
     // Get the profile to check availability
     const profile = await prisma.profile.findFirst({
       select: {

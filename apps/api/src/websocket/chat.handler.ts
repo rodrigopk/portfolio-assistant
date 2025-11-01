@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http';
 
-import { WebSocket, WebSocketServer } from 'ws';
 import { ChatAgent } from '@portfolio/agents';
+import { WebSocket, WebSocketServer } from 'ws';
 
 import {
   AuthMessage,

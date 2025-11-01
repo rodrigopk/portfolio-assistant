@@ -4,21 +4,18 @@ import Anthropic from '@anthropic-ai/sdk';
 
 // Mock dependencies
 vi.mock('@anthropic-ai/sdk');
-vi.mock('@prisma/client', () => {
-  const mockPrismaClient = {
-    conversation: {
-      findUnique: vi.fn(),
-      upsert: vi.fn(),
-    },
-  };
-  return {
-    PrismaClient: vi.fn(() => mockPrismaClient),
-    Prisma: {
-      JsonArray: Array,
-      JsonObject: Object,
-    },
-  };
-});
+
+const mockPrismaClient = {
+  conversation: {
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
+  },
+};
+
+vi.mock('../lib/prisma', () => ({
+  getPrismaClient: vi.fn(() => mockPrismaClient),
+  disconnectPrisma: vi.fn(),
+}));
 
 describe('ChatAgent', () => {
   let chatAgent: ChatAgent;
@@ -94,12 +91,11 @@ describe('ChatAgent', () => {
     });
 
     it('should handle rate limiting errors', async () => {
-      const rateLimitError = new Anthropic.APIError(
-        429,
-        { error: { type: 'rate_limit_error', message: 'Rate limit exceeded' } },
-        'Rate limit exceeded',
-        {}
-      );
+      const rateLimitError = {
+        status: 429,
+        message: 'Rate limit exceeded',
+        type: 'rate_limit_error',
+      };
 
       mockAnthropicCreate.mockRejectedValue(rateLimitError);
 
@@ -109,12 +105,11 @@ describe('ChatAgent', () => {
     });
 
     it('should handle service unavailable errors', async () => {
-      const serviceError = new Anthropic.APIError(
-        503,
-        { error: { type: 'service_unavailable', message: 'Service unavailable' } },
-        'Service unavailable',
-        {}
-      );
+      const serviceError = {
+        status: 503,
+        message: 'Service unavailable',
+        type: 'service_unavailable',
+      };
 
       mockAnthropicCreate.mockRejectedValue(serviceError);
 
