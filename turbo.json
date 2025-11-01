@@ -6,6 +6,14 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
+    "@devportfolio/api#build": {
+      "dependsOn": ["@portfolio/database#build", "@portfolio/agents#build"],
+      "outputs": ["dist/**"]
+    },
+    "@portfolio/agents#build": {
+      "dependsOn": ["@portfolio/database#build"],
+      "outputs": ["dist/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -16,6 +24,7 @@
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },
     "lint": {
+      "dependsOn": ["build"],
       "outputs": []
     },
     "clean": {

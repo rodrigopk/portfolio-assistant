@@ -1,4 +1,4 @@
-// Prisma schema for DevPortfolio AI
+// Shared Prisma schema for DevPortfolio AI
 // Based on TECHNICAL_DOCUMENTATION.md Section 4.2
 
 datasource db {
@@ -8,6 +8,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  engineType = "library"
 }
 
 model Profile {

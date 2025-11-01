@@ -10,6 +10,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'dist/', 'tests/', '**/*.config.ts', '**/*.config.js'],
     },
+    setupFiles: ['./src/__tests__/setup.ts'],
   },
   resolve: {
     alias: {

@@ -1,5 +1,6 @@
 import { IncomingMessage } from 'http';
 
+import { ChatAgent } from '@portfolio/agents';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import {
@@ -17,10 +18,12 @@ import { SessionManager } from './session.manager';
 export class ChatWebSocketHandler {
   private wss: WebSocketServer;
   private sessionManager: SessionManager;
+  private chatAgent: ChatAgent;
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
     this.sessionManager = new SessionManager();
+    this.chatAgent = new ChatAgent();
     this.setupWebSocketServer();
   }
 
@@ -171,10 +174,11 @@ export class ChatWebSocketHandler {
       // Log the message
       logger.info(`Chat message from ${sessionId}: ${message.message.substring(0, 50)}...`);
 
-      // Generate mock response (AI agent will be integrated later)
+      // Generate AI response with streaming
       // This can run asynchronously without blocking
-      this.generateMockResponse(ws, message.message, sessionId).catch((error) => {
-        logger.error('Error generating mock response:', error);
+      this.generateAIResponse(ws, message.message, sessionId).catch((error) => {
+        logger.error('Error generating AI response:', error);
+        this.sendError(ws, 'Failed to generate response', 'AI_ERROR');
       });
     } catch (error) {
       logger.error('Error handling chat message:', error);
@@ -201,54 +205,55 @@ export class ChatWebSocketHandler {
   }
 
   /**
-   * Generate mock response for chat messages
-   * This will be replaced with actual AI agent integration later
+   * Generate AI response for chat messages using ChatAgent
    */
-  private async generateMockResponse(
+  private async generateAIResponse(
     ws: WebSocket,
-    _message: string,
+    message: string,
     sessionId: string
   ): Promise<void> {
-    // Simulate AI thinking time
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      // Use the ChatAgent's streaming method
+      const stream = this.chatAgent.chatStream(message, sessionId);
 
-    // Generate mock response based on the message
-    const mockResponses = [
-      'I understand you need help with your portfolio project. Let me assist you with that.',
-      "That's an interesting question. Based on my analysis, I'd recommend the following approach...",
-      "I can help you implement that feature. Here's what I suggest...",
-      'Great question! Let me break this down for you step by step.',
-      "I've analyzed your request and here's my recommendation...",
-    ];
+      let hasContent = false;
+      for await (const token of stream) {
+        if (ws.readyState !== WebSocket.OPEN) {
+          logger.warn(`WebSocket closed for session ${sessionId}, stopping response`);
+          return;
+        }
 
-    const randomIndex = Math.floor(Math.random() * mockResponses.length);
-    const selectedResponse = mockResponses[randomIndex] ?? mockResponses[0] ?? '';
-    const words = selectedResponse.split(' ');
-
-    // Send response token by token to simulate streaming
-    for (const word of words) {
-      if (ws.readyState !== WebSocket.OPEN) {
-        logger.warn(`WebSocket closed for session ${sessionId}, stopping response`);
-        return;
+        hasContent = true;
+        this.sendMessage(ws, {
+          type: 'token',
+          content: token,
+        });
       }
 
-      this.sendMessage(ws, {
-        type: 'token',
-        content: word + ' ',
-      });
+      // Send done message
+      if (hasContent) {
+        this.sendMessage(ws, {
+          type: 'done',
+          conversationId: sessionId,
+        });
+        logger.info(`Completed AI response for session ${sessionId}`);
+      }
+    } catch (error) {
+      logger.error(`Error in AI response generation for session ${sessionId}:`, error);
 
-      // Simulate typing delay
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Fallback to a generic error response
+      if (ws.readyState === WebSocket.OPEN) {
+        this.sendMessage(ws, {
+          type: 'token',
+          content:
+            "I'm sorry, I'm having trouble processing your request right now. Please try again, or contact Rodrigo directly.",
+        });
+        this.sendMessage(ws, {
+          type: 'done',
+          conversationId: sessionId,
+        });
+      }
     }
-
-    // Send done message with a mock conversation ID
-    const conversationId = `conv-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    this.sendMessage(ws, {
-      type: 'done',
-      conversationId,
-    });
-
-    logger.info(`Completed mock response for session ${sessionId}`);
   }
 
   /**

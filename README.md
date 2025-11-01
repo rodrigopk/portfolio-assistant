@@ -52,7 +52,7 @@ portfolio-assistant/
 │   ├── shared/              # Shared types and utilities
 │   ├── ui/                  # Shared React components
 │   ├── agents/              # Mastra AI agents
-│   ├── database/            # Prisma schema and migrations
+│   ├── database/            # Shared database package with Prisma
 │   └── config/              # Shared configuration
 ├── docs/                    # Documentation
 ├── .husky/                  # Git hooks
@@ -99,9 +99,14 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-5. **Run database migrations** (coming soon)
+5. **Run database migrations**
 
 ```bash
+# Start database services
+npm run docker:up
+
+# Run migrations and seed data
+cd packages/database
 npm run db:migrate
 npm run db:seed
 ```
@@ -113,6 +118,49 @@ npm run dev
 ```
 
 The API will be available at `http://localhost:3001`
+
+## Database Architecture
+
+The application uses a shared database package that provides:
+
+### 🏗️ Shared Database Package (`@portfolio/database`)
+
+- **Prisma ORM** with shared client and schema
+- **Connection Pooling** with environment-specific optimization
+- **Health Monitoring** and performance metrics
+- **Migration Management** for production deployments
+
+### 🔄 Connection Pooling
+
+Environment-optimized connection pools:
+
+- **Development**: 10 connections, debugging-friendly timeouts
+- **Staging**: 20 connections, realistic load testing
+- **Production**: 50 connections, high-performance optimization
+
+### 📊 Database Monitoring
+
+Built-in health checks and metrics:
+
+- Connection pool utilization
+- Query performance monitoring
+- Error rate tracking
+- Automated performance recommendations
+
+### 🚀 Migration Workflow
+
+Production-ready migration system:
+
+- Automated backups before migrations
+- Environment-specific configurations
+- GitHub Actions integration
+- Rollback capabilities
+
+For detailed information, see:
+
+- [Database Package README](packages/database/README.md)
+- [Connection Pooling Guide](docs/DATABASE_CONNECTION_POOLING.md)
+- [Migration Workflow](packages/database/scripts/migrate-production.sh)
 
 ## Available Scripts
 
@@ -133,6 +181,19 @@ npm run dev          # Start API dev server
 npm run build        # Build API
 npm test             # Run API tests
 npm run lint         # Lint API code
+```
+
+### Database Specific
+
+```bash
+cd packages/database
+npm run db:migrate         # Run development migrations
+npm run db:migrate:deploy  # Deploy migrations (production)
+npm run db:migrate:status  # Check migration status
+npm run db:seed           # Seed database with sample data
+npm run db:studio         # Open Prisma Studio
+npm run docker:up         # Start database services
+npm run docker:migrate    # Run migrations in Docker
 ```
 
 ## Development Workflow
@@ -180,21 +241,31 @@ git push origin feature/my-feature
 Key environment variables (see `.env.example` for complete list):
 
 ```env
-# Database
+# Database Connection
 DATABASE_URL=postgresql://user:password@localhost:5432/portfolio
 
-# Redis
+# Connection Pooling (Optional - auto-configured by environment)
+DATABASE_CONNECTION_LIMIT=50          # Max connections
+DATABASE_IDLE_TIMEOUT=15000          # Connection idle timeout (ms)
+DATABASE_MAX_LIFETIME=900000         # Connection max lifetime (ms)
+DATABASE_SSL_MODE=require            # SSL mode for production
+
+# Redis Cache
 REDIS_URL=redis://localhost:6379
 
 # AI Configuration
 CLAUDE_API_KEY=your_anthropic_api_key
 
-# GitHub
+# GitHub Integration
 GITHUB_TOKEN=your_github_token
 GITHUB_USERNAME=your_username
 
 # Authentication
 JWT_SECRET=your_jwt_secret
+
+# Environment
+NODE_ENV=development                  # development/staging/production
+LOG_LEVEL=info                       # debug/info/warn/error
 ```
 
 ## Documentation
@@ -213,13 +284,16 @@ JWT_SECRET=your_jwt_secret
 - [x] Basic middleware and error handling
 - [x] Health check endpoints
 
-### 🚧 Phase 2: Core Backend (In Progress)
+### ✅ Phase 2: Core Backend (Completed)
 
-- [ ] Database schema with Prisma
-- [ ] Authentication system
-- [ ] Profile and projects endpoints
-- [ ] GitHub integration for projects sync
-- [ ] Caching layer with Redis
+- [x] **Shared Database Package** - Prisma-based database layer
+- [x] **Connection Pooling** - Environment-optimized connection management
+- [x] **Database Monitoring** - Health checks and performance metrics
+- [x] **Migration Workflow** - Production-ready database migrations
+- [x] **API Test Suite** - Comprehensive API testing with mocks
+- [x] Profile and projects endpoints
+- [x] Caching layer with Redis
+- [x] GitHub Actions CI/CD pipeline
 
 ### 📋 Phase 3: AI Integration
 
