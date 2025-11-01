@@ -10,15 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.js"
-    },
-    "./client": {
-      "types": "./dist/generated/client/index.d.ts",
-      "import": "./dist/generated/client/index.js",
-      "require": "./dist/generated/client/index.js"
     }
   },
   "scripts": {
-    "build": "npm run db:generate && tsc --build && cp -r src/generated dist/",
+    "build": "npm run db:generate && tsc --build",
     "dev": "npm run db:generate && tsc --watch",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -38,7 +33,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules/.prisma"
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

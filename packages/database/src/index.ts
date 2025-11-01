@@ -4,8 +4,8 @@
  */
 
 // Export Prisma client and types
-export { PrismaClient } from './generated/client/index';
-export type { Profile, Project, Conversation, Prisma } from './generated/client/index';
+export { PrismaClient } from '@prisma/client';
+export type { Profile, Project, Conversation, Prisma } from '@prisma/client';
 
 // Export repository classes and types
 export { ConversationRepository } from './conversation-repository';
@@ -35,7 +35,7 @@ export {
 
 // Legacy exports for backward compatibility
 import { database } from './connection';
-import { PrismaClient } from './generated/client/index';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Get the singleton PrismaClient instance (legacy)

@@ -3,7 +3,7 @@
  * Handles connection pooling for different environments with proper resource management
  */
 
-import { PrismaClient } from './generated/client/index.js';
+import { PrismaClient } from '@prisma/client';
 import { loadDatabaseConfig, getPrismaConfig } from './config.js';
 import type { DatabaseConfig } from './config.js';
 
@@ -289,7 +289,7 @@ class DatabaseConnection {
       let activeConnections = 0;
       let idleConnections = 0;
 
-      result.forEach((row) => {
+      result.forEach((row: { state: string; count: bigint }) => {
         const count = Number(row.count);
         if (row.state === 'active') {
           activeConnections = count;
