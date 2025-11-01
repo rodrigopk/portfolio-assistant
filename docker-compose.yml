@@ -20,7 +20,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./packages/database/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U portfolio_user -d portfolio_dev"]
+      test: [ "CMD-SHELL", "pg_isready -U portfolio_user -d portfolio_dev" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,7 +38,7 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes --requirepass ""
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5

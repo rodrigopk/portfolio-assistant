@@ -3,7 +3,9 @@ import type { Message } from '../chat-agent';
 /**
  * Convert internal message format to Claude API format
  */
-export function formatMessagesForClaude(messages: Message[]): Array<{ role: 'user' | 'assistant'; content: string }> {
+export function formatMessagesForClaude(
+  messages: Message[]
+): Array<{ role: 'user' | 'assistant'; content: string }> {
   return messages.map((msg) => ({
     role: msg.role,
     content: msg.content,
@@ -13,7 +15,11 @@ export function formatMessagesForClaude(messages: Message[]): Array<{ role: 'use
 /**
  * Create a new message object with timestamp
  */
-export function createMessage(role: 'user' | 'assistant', content: string, timestamp?: Date): Message {
+export function createMessage(
+  role: 'user' | 'assistant',
+  content: string,
+  timestamp?: Date
+): Message {
   return {
     role,
     content,

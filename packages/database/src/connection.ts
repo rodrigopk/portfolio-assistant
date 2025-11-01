@@ -26,7 +26,7 @@ export interface ConnectionPoolConfig {
 export function getConnectionPoolConfig(config: DatabaseConfig): ConnectionPoolConfig {
   const isProduction = config.nodeEnv === 'production';
   const isStaging = config.nodeEnv === 'staging';
-  
+
   // Base configuration
   const baseConfig: ConnectionPoolConfig = {
     maxConnections: config.connectionLimit,
@@ -40,7 +40,7 @@ export function getConnectionPoolConfig(config: DatabaseConfig): ConnectionPoolC
     poolMin: isProduction ? Math.ceil(config.connectionLimit * 0.1) : 1,
     poolMax: config.connectionLimit,
   };
-  
+
   // Environment-specific overrides
   if (isProduction) {
     return {
@@ -52,7 +52,7 @@ export function getConnectionPoolConfig(config: DatabaseConfig): ConnectionPoolC
       acquireTimeoutMs: 10000,
     };
   }
-  
+
   if (isStaging) {
     return {
       ...baseConfig,
@@ -63,7 +63,7 @@ export function getConnectionPoolConfig(config: DatabaseConfig): ConnectionPoolC
       acquireTimeoutMs: 15000,
     };
   }
-  
+
   // Development
   return {
     ...baseConfig,
@@ -86,12 +86,12 @@ class DatabaseConnection {
   private isConnected = false;
   private connectionRetries = 0;
   private maxRetries = 3;
-  
+
   private constructor(environment?: string) {
     this.config = loadDatabaseConfig(environment);
     this.poolConfig = getConnectionPoolConfig(this.config);
   }
-  
+
   /**
    * Get singleton instance
    */
@@ -101,16 +101,16 @@ class DatabaseConnection {
     }
     return DatabaseConnection.instance;
   }
-  
+
   /**
    * Initialize Prisma client with connection pooling
    */
   private createPrismaClient(): PrismaClient {
     const prismaConfig = getPrismaConfig();
-    
+
     // Add connection pool configuration to datasource URL
     const pooledUrl = this.buildPooledConnectionUrl();
-    
+
     return new PrismaClient({
       ...prismaConfig,
       datasources: {
@@ -122,18 +122,21 @@ class DatabaseConnection {
       log: this.getLogConfig(),
     });
   }
-  
+
   /**
    * Build connection URL with pooling parameters
    */
   private buildPooledConnectionUrl(): string {
     const url = new URL(this.config.databaseUrl);
-    
+
     // Add connection pool parameters
     url.searchParams.set('connection_limit', this.poolConfig.maxConnections.toString());
-    url.searchParams.set('pool_timeout', Math.ceil(this.poolConfig.acquireTimeoutMs / 1000).toString());
+    url.searchParams.set(
+      'pool_timeout',
+      Math.ceil(this.poolConfig.acquireTimeoutMs / 1000).toString()
+    );
     url.searchParams.set('sslmode', this.config.sslMode || 'prefer');
-    
+
     // Production-specific parameters
     if (this.config.nodeEnv === 'production') {
       url.searchParams.set('sslmode', 'require');
@@ -141,10 +144,10 @@ class DatabaseConnection {
       url.searchParams.set('lock_timeout', '10000'); // 10 seconds
       url.searchParams.set('idle_in_transaction_session_timeout', '60000'); // 1 minute
     }
-    
+
     return url.toString();
   }
-  
+
   /**
    * Get logging configuration based on environment
    */
@@ -163,14 +166,12 @@ class DatabaseConnection {
           { level: 'error' as const, emit: 'stdout' as const },
         ];
       case 'production':
-        return [
-          { level: 'error' as const, emit: 'stdout' as const },
-        ];
+        return [{ level: 'error' as const, emit: 'stdout' as const }];
       default:
         return [];
     }
   }
-  
+
   /**
    * Connect to database with retry logic
    */
@@ -178,32 +179,37 @@ class DatabaseConnection {
     if (this.isConnected && this.prisma) {
       return;
     }
-    
+
     try {
       this.prisma = this.createPrismaClient();
       await this.prisma.$connect();
       this.isConnected = true;
       this.connectionRetries = 0;
-      
+
       console.log(`✅ Database connected (Environment: ${this.config.nodeEnv})`);
-      console.log(`📊 Connection pool: ${this.poolConfig.minConnections}-${this.poolConfig.maxConnections} connections`);
+      console.log(
+        `📊 Connection pool: ${this.poolConfig.minConnections}-${this.poolConfig.maxConnections} connections`
+      );
     } catch (error) {
       this.connectionRetries++;
-      console.error(`❌ Database connection failed (attempt ${this.connectionRetries}/${this.maxRetries}):`, error);
-      
+      console.error(
+        `❌ Database connection failed (attempt ${this.connectionRetries}/${this.maxRetries}):`,
+        error
+      );
+
       if (this.connectionRetries >= this.maxRetries) {
         throw new Error(`Failed to connect to database after ${this.maxRetries} attempts`);
       }
-      
+
       // Exponential backoff
       const delay = Math.min(1000 * Math.pow(2, this.connectionRetries), 30000);
       console.log(`🔄 Retrying connection in ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
       return this.connect();
     }
   }
-  
+
   /**
    * Disconnect from database
    */
@@ -215,7 +221,7 @@ class DatabaseConnection {
       console.log('📴 Database disconnected');
     }
   }
-  
+
   /**
    * Get Prisma client instance
    */
@@ -225,29 +231,31 @@ class DatabaseConnection {
     }
     return this.prisma;
   }
-  
+
   /**
    * Health check for the database connection
    */
   public async healthCheck(): Promise<{
     connected: boolean;
     responseTime: number;
-    poolStatus: {
-      activeConnections: number;
-      idleConnections: number;
-      totalConnections: number;
-    } | undefined;
+    poolStatus:
+      | {
+          activeConnections: number;
+          idleConnections: number;
+          totalConnections: number;
+        }
+      | undefined;
   }> {
     if (!this.prisma) {
       return { connected: false, responseTime: -1, poolStatus: undefined };
     }
-    
+
     const startTime = Date.now();
-    
+
     try {
       await this.prisma.$queryRaw`SELECT 1`;
       const responseTime = Date.now() - startTime;
-      
+
       return {
         connected: true,
         responseTime,
@@ -257,29 +265,31 @@ class DatabaseConnection {
       return { connected: false, responseTime: Date.now() - startTime, poolStatus: undefined };
     }
   }
-  
+
   /**
    * Get connection pool status
    */
   private async getPoolStatus() {
     if (!this.prisma) return undefined;
-    
+
     try {
       // Query PostgreSQL stats to get connection info
-      const result = await this.prisma.$queryRaw<Array<{
-        state: string;
-        count: bigint;
-      }>>`
+      const result = await this.prisma.$queryRaw<
+        Array<{
+          state: string;
+          count: bigint;
+        }>
+      >`
         SELECT state, count(*) as count
         FROM pg_stat_activity 
         WHERE datname = current_database()
         GROUP BY state
       `;
-      
+
       let activeConnections = 0;
       let idleConnections = 0;
-      
-      result.forEach(row => {
+
+      result.forEach((row) => {
         const count = Number(row.count);
         if (row.state === 'active') {
           activeConnections = count;
@@ -287,7 +297,7 @@ class DatabaseConnection {
           idleConnections = count;
         }
       });
-      
+
       return {
         activeConnections,
         idleConnections,
@@ -297,14 +307,14 @@ class DatabaseConnection {
       return undefined;
     }
   }
-  
+
   /**
    * Get connection pool configuration
    */
   public getPoolConfig(): ConnectionPoolConfig {
     return { ...this.poolConfig };
   }
-  
+
   /**
    * Get database configuration
    */
@@ -314,7 +324,7 @@ class DatabaseConnection {
 }
 
 // Export singleton instance and factory function
-export const createDatabaseConnection = (environment?: string) => 
+export const createDatabaseConnection = (environment?: string) =>
   DatabaseConnection.getInstance(environment);
 
 // Export default instance for convenience
@@ -322,7 +332,7 @@ export const database = createDatabaseConnection();
 
 // Auto-connect in non-test environments
 if (process.env.NODE_ENV !== 'test') {
-  database.connect().catch(error => {
+  database.connect().catch((error) => {
     console.error('Failed to auto-connect to database:', error);
     process.exit(1);
   });

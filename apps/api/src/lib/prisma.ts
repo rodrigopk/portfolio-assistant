@@ -10,11 +10,11 @@ async function initializeDatabase() {
   try {
     await database.connect();
     logger.info('Database connection initialized with pooling');
-    
+
     // Start monitoring in development/staging
     if (process.env['NODE_ENV'] !== 'production') {
       const monitor = databaseMonitor.startPeriodicMonitoring(60000); // 1 minute intervals
-      
+
       // Stop monitoring on shutdown
       process.on('beforeExit', () => {
         clearInterval(monitor);

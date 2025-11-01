@@ -60,7 +60,9 @@ export interface ToolResult {
 /**
  * Process tool calls from Claude's response and execute them
  */
-export async function processToolCalls(toolCalls: Array<{ id: string; name: string; input: Record<string, unknown> }>): Promise<ToolResult[]> {
+export async function processToolCalls(
+  toolCalls: Array<{ id: string; name: string; input: Record<string, unknown> }>
+): Promise<ToolResult[]> {
   return Promise.all(
     toolCalls.map(async (call) => ({
       type: 'tool_result' as const,

@@ -49,7 +49,7 @@ export async function checkAvailability(_input: CheckAvailabilityInput) {
 export const checkAvailabilityTool = {
   name: 'checkAvailability',
   description:
-    "Get current freelance availability status for Rodrigo. Returns availability status (available/limited/unavailable) and hourly rate if applicable.",
+    'Get current freelance availability status for Rodrigo. Returns availability status (available/limited/unavailable) and hourly rate if applicable.',
   input_schema: {
     type: 'object' as const,
     properties: {},

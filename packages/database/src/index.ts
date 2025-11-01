@@ -5,23 +5,14 @@
 
 // Export Prisma client and types
 export { PrismaClient } from './generated/client/index.js';
-export type {
-  Profile,
-  Project,
-  Conversation,
-  Prisma
-} from './generated/client/index.js';
+export type { Profile, Project, Conversation, Prisma } from './generated/client/index.js';
 
 // Export repository classes and types
 export { ConversationRepository } from './conversation-repository.js';
 export type { MessageData } from './conversation-repository.js';
 
 // Export database connection and pooling
-export {
-  database,
-  createDatabaseConnection,
-  type ConnectionPoolConfig,
-} from './connection.js';
+export { database, createDatabaseConnection, type ConnectionPoolConfig } from './connection.js';
 
 // Export monitoring utilities
 export {

@@ -36,14 +36,14 @@ export class DatabaseMonitor {
     queryErrors: 0,
     timeoutErrors: 0,
   };
-  
+
   constructor() {
     this.metrics = this.createInitialMetrics();
   }
-  
+
   private createInitialMetrics(): DatabaseMetrics {
     const config = database.getPoolConfig();
-    
+
     return {
       timestamp: new Date(),
       connectionPool: {
@@ -61,7 +61,7 @@ export class DatabaseMonitor {
       errors: { ...this.errorCounts },
     };
   }
-  
+
   /**
    * Collect current database metrics
    */
@@ -69,7 +69,7 @@ export class DatabaseMonitor {
     try {
       const healthCheck = await database.healthCheck();
       const config = database.getPoolConfig();
-      
+
       this.metrics = {
         timestamp: new Date(),
         connectionPool: {
@@ -77,7 +77,7 @@ export class DatabaseMonitor {
           idle: healthCheck.poolStatus?.idleConnections || 0,
           total: healthCheck.poolStatus?.totalConnections || 0,
           maxConnections: config.maxConnections,
-          utilizationPercent: healthCheck.poolStatus?.totalConnections 
+          utilizationPercent: healthCheck.poolStatus?.totalConnections
             ? Math.round((healthCheck.poolStatus.totalConnections / config.maxConnections) * 100)
             : 0,
         },
@@ -88,28 +88,28 @@ export class DatabaseMonitor {
         },
         errors: { ...this.errorCounts },
       };
-      
+
       return this.metrics;
     } catch (error) {
       this.incrementErrorCount('connectionErrors');
       throw error;
     }
   }
-  
+
   /**
    * Get current metrics without collecting new ones
    */
   public getCurrentMetrics(): DatabaseMetrics {
     return { ...this.metrics };
   }
-  
+
   /**
    * Increment error count by type
    */
   public incrementErrorCount(errorType: keyof typeof this.errorCounts): void {
     this.errorCounts[errorType]++;
   }
-  
+
   /**
    * Reset error counts
    */
@@ -120,7 +120,7 @@ export class DatabaseMonitor {
       timeoutErrors: 0,
     };
   }
-  
+
   /**
    * Check if database is healthy
    */
@@ -128,19 +128,19 @@ export class DatabaseMonitor {
     try {
       const healthCheck = await database.healthCheck();
       const metrics = await this.collectMetrics();
-      
+
       // Health criteria
       const isConnected = healthCheck.connected;
       const responseTimeOk = healthCheck.responseTime < 5000; // 5 seconds max
       const poolNotOverloaded = metrics.connectionPool.utilizationPercent < 90;
       const lowErrorRate = metrics.errors.connectionErrors < 10;
-      
+
       return isConnected && responseTimeOk && poolNotOverloaded && lowErrorRate;
     } catch {
       return false;
     }
   }
-  
+
   /**
    * Get health status with details
    */
@@ -160,17 +160,17 @@ export class DatabaseMonitor {
       const responseTimeOk = metrics.performance.responseTimeMs < 5000;
       const poolUtilizationOk = metrics.connectionPool.utilizationPercent < 90;
       const errorRateOk = metrics.errors.connectionErrors < 10;
-      
+
       const checks = {
         database_connected: metrics.performance.connected,
         response_time_ok: responseTimeOk,
         pool_utilization_ok: poolUtilizationOk,
         error_rate_ok: errorRateOk,
       };
-      
-      const allChecksPass = Object.values(checks).every(check => check);
+
+      const allChecksPass = Object.values(checks).every((check) => check);
       const criticalFailure = !metrics.performance.connected;
-      
+
       let status: 'healthy' | 'warning' | 'critical';
       if (criticalFailure) {
         status = 'critical';
@@ -179,7 +179,7 @@ export class DatabaseMonitor {
       } else {
         status = 'healthy';
       }
-      
+
       return {
         healthy: allChecksPass,
         status,
@@ -188,7 +188,7 @@ export class DatabaseMonitor {
       };
     } catch {
       this.incrementErrorCount('connectionErrors');
-      
+
       return {
         healthy: false,
         status: 'critical',
@@ -202,13 +202,13 @@ export class DatabaseMonitor {
       };
     }
   }
-  
+
   /**
    * Log metrics to console (for development/debugging)
    */
   public logMetrics(): void {
     const metrics = this.getCurrentMetrics();
-    
+
     console.log('📊 Database Metrics:', {
       timestamp: metrics.timestamp.toISOString(),
       connected: metrics.performance.connected,
@@ -217,13 +217,13 @@ export class DatabaseMonitor {
       errors: metrics.errors,
     });
   }
-  
+
   /**
    * Start periodic monitoring (for development/staging)
    */
   public startPeriodicMonitoring(intervalMs = 30000): NodeJS.Timeout {
     console.log(`🔄 Starting database monitoring (interval: ${intervalMs}ms)`);
-    
+
     return setInterval(async () => {
       try {
         await this.collectMetrics();
@@ -245,10 +245,10 @@ export function createHealthCheckMiddleware() {
   return async (req: unknown, res: unknown, _next: unknown) => {
     // Type assertion for Express types
     const response = res as { status: (code: number) => { json: (data: unknown) => void } };
-    
+
     try {
       const healthStatus = await databaseMonitor.getHealthStatus();
-      
+
       response.status(healthStatus.healthy ? 200 : 503).json({
         status: healthStatus.status,
         timestamp: new Date().toISOString(),
@@ -273,30 +273,33 @@ export function createHealthCheckMiddleware() {
  */
 export function getPerformanceRecommendations(metrics: DatabaseMetrics): string[] {
   const recommendations: string[] = [];
-  
+
   // High connection pool utilization
   if (metrics.connectionPool.utilizationPercent > 80) {
     recommendations.push('Consider increasing connection pool size');
   }
-  
+
   // Slow response times
   if (metrics.performance.responseTimeMs > 1000) {
     recommendations.push('Database response time is slow - check query performance');
   }
-  
+
   // High error rates
   if (metrics.errors.connectionErrors > 5) {
     recommendations.push('High connection error rate - check database availability');
   }
-  
+
   if (metrics.errors.queryErrors > 10) {
     recommendations.push('High query error rate - review application queries');
   }
-  
+
   // Low utilization
-  if (metrics.connectionPool.utilizationPercent < 10 && metrics.connectionPool.maxConnections > 10) {
+  if (
+    metrics.connectionPool.utilizationPercent < 10 &&
+    metrics.connectionPool.maxConnections > 10
+  ) {
     recommendations.push('Connection pool may be oversized - consider reducing maxConnections');
   }
-  
+
   return recommendations;
 }

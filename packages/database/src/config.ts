@@ -31,25 +31,25 @@ export interface DatabaseConfig {
  */
 export function loadDatabaseConfig(environment?: string): DatabaseConfig {
   const env = environment || process.env.NODE_ENV || 'development';
-  
+
   // Load base environment variables
   config();
-  
+
   // Load environment-specific variables
   const envFile = join(__dirname, '..', 'env', `.env.${env}`);
   config({ path: envFile });
-  
+
   // Validate required variables
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL is required but not provided');
   }
-  
+
   const redisUrl = process.env.REDIS_URL;
   if (!redisUrl) {
     throw new Error('REDIS_URL is required but not provided');
   }
-  
+
   return {
     databaseUrl,
     redisUrl,
@@ -72,7 +72,7 @@ export function loadDatabaseConfig(environment?: string): DatabaseConfig {
  */
 export function getPrismaConfig(environment?: string) {
   const config = loadDatabaseConfig(environment);
-  
+
   const prismaConfig: Record<string, unknown> = {
     datasources: {
       db: {
@@ -80,7 +80,7 @@ export function getPrismaConfig(environment?: string) {
       },
     },
   };
-  
+
   // Add logging configuration
   if (config.nodeEnv === 'development') {
     prismaConfig.log = ['query', 'info', 'warn', 'error'];
@@ -89,7 +89,7 @@ export function getPrismaConfig(environment?: string) {
   } else {
     prismaConfig.log = ['error'];
   }
-  
+
   return prismaConfig;
 }
 
@@ -98,11 +98,11 @@ export function getPrismaConfig(environment?: string) {
  */
 export function getRedisConfig(environment?: string) {
   const config = loadDatabaseConfig(environment);
-  
+
   const redisConfig: Record<string, unknown> = {
     url: config.redisUrl,
   };
-  
+
   // Add SSL configuration for production
   if (config.nodeEnv === 'production' && config.sslMode) {
     redisConfig.socket = {
@@ -110,7 +110,7 @@ export function getRedisConfig(environment?: string) {
       rejectUnauthorized: config.sslRejectUnauthorized,
     };
   }
-  
+
   return redisConfig;
 }
 
@@ -119,27 +119,27 @@ export function getRedisConfig(environment?: string) {
  */
 export function validateDatabaseConfig(config: DatabaseConfig): void {
   const errors: string[] = [];
-  
+
   if (!config.databaseUrl) {
     errors.push('DATABASE_URL is required');
   }
-  
+
   if (!config.redisUrl) {
     errors.push('REDIS_URL is required');
   }
-  
+
   if (config.connectionLimit <= 0) {
     errors.push('DATABASE_CONNECTION_LIMIT must be greater than 0');
   }
-  
+
   if (config.idleTimeout <= 0) {
     errors.push('DATABASE_IDLE_TIMEOUT must be greater than 0');
   }
-  
+
   if (config.maxLifetime <= 0) {
     errors.push('DATABASE_MAX_LIFETIME must be greater than 0');
   }
-  
+
   if (errors.length > 0) {
     throw new Error(`Database configuration validation failed:\n${errors.join('\n')}`);
   }

@@ -54,10 +54,7 @@ const agent = new ChatAgent(
   10 // max messages in history
 );
 
-const response = await agent.chat(
-  'What projects have you built with React?',
-  'session-123'
-);
+const response = await agent.chat('What projects have you built with React?', 'session-123');
 
 console.log(response.response);
 ```
@@ -112,6 +109,7 @@ constructor(
 Send a message and get a complete response.
 
 **Parameters:**
+
 - `userMessage: string` - The user's message
 - `sessionId: string` - Unique session identifier
 - `metadata?: object` - Optional metadata to store with conversation
@@ -123,6 +121,7 @@ Send a message and get a complete response.
 Send a message and stream the response token by token.
 
 **Parameters:**
+
 - Same as `chat()`
 
 **Returns:** `AsyncGenerator<string>` - Async iterator yielding tokens
@@ -130,6 +129,7 @@ Send a message and stream the response token by token.
 ### Tools
 
 All tools return a result object with:
+
 - `success: boolean` - Whether the operation succeeded
 - Additional fields specific to each tool
 

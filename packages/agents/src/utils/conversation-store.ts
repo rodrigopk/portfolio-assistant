@@ -6,7 +6,7 @@ import { logger } from '../lib/logger';
  * Load conversation history from database
  */
 export async function loadConversationHistory(
-  _prisma: unknown, // Legacy parameter for compatibility 
+  _prisma: unknown, // Legacy parameter for compatibility
   sessionId: string,
   maxMessages: number
 ): Promise<Message[]> {
@@ -20,7 +20,7 @@ export async function loadConversationHistory(
       .map((msg: MessageData) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
       }));
   } catch (error) {
     logger.error('Error loading conversation history:', error);
@@ -45,7 +45,7 @@ export async function saveConversation(
       const messageData: MessageData = {
         role: message.role,
         content: message.content,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       await repository.addMessage(sessionId, messageData);
     }
@@ -53,7 +53,7 @@ export async function saveConversation(
     logger.info('Saved conversation for session:', {
       sessionId,
       messageCount: messages.length,
-      metadata
+      metadata,
     });
   } catch (error) {
     logger.error('Error saving conversation:', error);

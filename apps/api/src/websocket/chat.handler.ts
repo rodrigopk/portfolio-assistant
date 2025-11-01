@@ -245,7 +245,8 @@ export class ChatWebSocketHandler {
       if (ws.readyState === WebSocket.OPEN) {
         this.sendMessage(ws, {
           type: 'token',
-          content: "I'm sorry, I'm having trouble processing your request right now. Please try again, or contact Rodrigo directly.",
+          content:
+            "I'm sorry, I'm having trouble processing your request right now. Please try again, or contact Rodrigo directly.",
         });
         this.sendMessage(ws, {
           type: 'done',

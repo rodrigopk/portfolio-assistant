@@ -100,7 +100,9 @@ describe('getProjectDetails', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    vi.spyOn(mockPrismaClient.project, 'findFirst').mockRejectedValue(new Error('Connection timeout'));
+    vi.spyOn(mockPrismaClient.project, 'findFirst').mockRejectedValue(
+      new Error('Connection timeout')
+    );
 
     const result = await getProjectDetails({ projectId: '123' });
 

@@ -29,7 +29,7 @@ describe('tool-executor', () => {
       vi.mocked(searchProjects).mockResolvedValue({
         success: true,
         projects: [],
-        count: 0
+        count: 0,
       });
 
       const result = await executeTool('searchProjects', { query: 'test' });
@@ -99,7 +99,7 @@ describe('tool-executor', () => {
       vi.mocked(searchProjects).mockResolvedValue({
         success: true,
         projects: [],
-        count: 0
+        count: 0,
       });
 
       const mockProject = {

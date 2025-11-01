@@ -3,7 +3,8 @@ import { suggestProposal } from '../tools/suggestProposal';
 
 describe('suggestProposal', () => {
   it('should suggest proposal for detailed requirements', async () => {
-    const requirements = 'I need a full-stack web application with user authentication, dashboard, and reporting features. Budget around $10k.';
+    const requirements =
+      'I need a full-stack web application with user authentication, dashboard, and reporting features. Budget around $10k.';
 
     const result = await suggestProposal({ requirements });
 
@@ -79,7 +80,8 @@ describe('suggestProposal', () => {
   });
 
   it('should suggest proposal for very long requirements', async () => {
-    const requirements = 'I need a comprehensive enterprise solution with multiple modules including inventory management, customer relationship management, financial reporting, employee management, and integration with third-party services. The system should support multiple users with role-based access control.';
+    const requirements =
+      'I need a comprehensive enterprise solution with multiple modules including inventory management, customer relationship management, financial reporting, employee management, and integration with third-party services. The system should support multiple users with role-based access control.';
 
     const result = await suggestProposal({ requirements });
 

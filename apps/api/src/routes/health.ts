@@ -1,7 +1,6 @@
 import { databaseMonitor } from '@portfolio/database';
 import { Router, Request, Response } from 'express';
 
-
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -23,7 +22,7 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   try {
     // Check database health
     const dbHealth = await databaseMonitor.getHealthStatus();
-    
+
     const healthCheck: HealthCheck = {
       status: dbHealth.healthy ? 'ok' : 'error',
       timestamp: new Date().toISOString(),
@@ -84,7 +83,7 @@ router.get('/live', (_req: Request, res: Response): void => {
 router.get('/database', async (_req: Request, res: Response): Promise<void> => {
   try {
     const healthStatus = await databaseMonitor.getHealthStatus();
-    
+
     res.status(healthStatus.healthy ? 200 : 503).json({
       status: healthStatus.status,
       timestamp: new Date().toISOString(),

@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { formatMessagesForClaude, createMessage, limitConversationHistory } from '../utils/message-formatter';
+import {
+  formatMessagesForClaude,
+  createMessage,
+  limitConversationHistory,
+} from '../utils/message-formatter';
 import type { Message } from '../chat-agent';
 
 describe('message-formatter', () => {

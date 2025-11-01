@@ -47,10 +47,7 @@ export class ConversationRepository {
   /**
    * Update conversation messages
    */
-  async updateMessages(
-    sessionId: string,
-    messages: MessageData[]
-  ): Promise<Conversation> {
+  async updateMessages(sessionId: string, messages: MessageData[]): Promise<Conversation> {
     return this.prisma.conversation.update({
       where: { sessionId },
       data: {
@@ -64,10 +61,7 @@ export class ConversationRepository {
   /**
    * Add a single message to an existing conversation
    */
-  async addMessage(
-    sessionId: string,
-    message: MessageData
-  ): Promise<Conversation> {
+  async addMessage(sessionId: string, message: MessageData): Promise<Conversation> {
     const conversation = await this.findBySessionId(sessionId);
     if (!conversation) {
       // Create new conversation if it doesn't exist
@@ -78,7 +72,7 @@ export class ConversationRepository {
     }
 
     const currentMessages = Array.isArray(conversation.messages)
-      ? conversation.messages as unknown as MessageData[]
+      ? (conversation.messages as unknown as MessageData[])
       : [];
 
     const updatedMessages = [...currentMessages, message];
@@ -89,17 +83,14 @@ export class ConversationRepository {
   /**
    * Get messages for a conversation with optional limit
    */
-  async getMessages(
-    sessionId: string,
-    limit?: number
-  ): Promise<MessageData[]> {
+  async getMessages(sessionId: string, limit?: number): Promise<MessageData[]> {
     const conversation = await this.findBySessionId(sessionId);
     if (!conversation) {
       return [];
     }
 
     const messages = Array.isArray(conversation.messages)
-      ? conversation.messages as unknown as MessageData[]
+      ? (conversation.messages as unknown as MessageData[])
       : [];
 
     return limit ? messages.slice(-limit) : messages;
@@ -123,7 +114,7 @@ export class ConversationRepository {
       return null;
     }
 
-    return conversation.metadata as Record<string, unknown> || {};
+    return (conversation.metadata as Record<string, unknown>) || {};
   }
 
   /**

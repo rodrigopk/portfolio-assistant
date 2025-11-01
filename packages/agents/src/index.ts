@@ -8,5 +8,9 @@ export { getPrismaClient, disconnectPrisma } from './lib/prisma';
 // Export utility functions for easier testing and reuse
 export { handleChatError, handleStreamError } from './utils/error-handler';
 export { executeTool, processToolCalls, AGENT_TOOLS } from './utils/tool-executor';
-export { formatMessagesForClaude, createMessage, limitConversationHistory } from './utils/message-formatter';
+export {
+  formatMessagesForClaude,
+  createMessage,
+  limitConversationHistory,
+} from './utils/message-formatter';
 export { loadConversationHistory, saveConversation } from './utils/conversation-store';
