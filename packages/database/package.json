@@ -8,10 +8,12 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
     "./client": {
       "types": "./dist/generated/client/index.d.ts",
+      "import": "./dist/generated/client/index.js",
       "require": "./dist/generated/client/index.js"
     }
   },

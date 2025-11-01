@@ -2,9 +2,6 @@ import { database, databaseMonitor } from '@portfolio/database';
 
 import { logger } from '../utils/logger';
 
-// Get the shared database connection with pooling
-export const prisma = database.getClient();
-
 // Initialize database connection
 async function initializeDatabase() {
   try {
@@ -40,6 +37,19 @@ process.on('beforeExit', async () => {
   } catch (error) {
     logger.error('Error disconnecting from database:', error);
   }
+});
+
+// Export a getter function that returns the client after connection
+export function getPrisma() {
+  return database.getClient();
+}
+
+// Export for backward compatibility
+export const prisma = new Proxy({} as ReturnType<typeof database.getClient>, {
+  get(_target, prop) {
+    const client = database.getClient();
+    return client[prop as keyof typeof client];
+  },
 });
 
 export default prisma;
