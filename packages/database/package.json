@@ -1,7 +1,6 @@
 {
   "name": "@portfolio/database",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
   "description": "Shared database package with Prisma client and schema",
   "main": "./dist/index.js",
@@ -9,15 +8,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "require": "./dist/index.js"
     },
     "./client": {
       "types": "./dist/generated/client/index.d.ts",
-      "import": "./dist/generated/client/index.js"
+      "require": "./dist/generated/client/index.js"
     }
   },
   "scripts": {
-    "build": "npm run db:generate && tsc",
+    "build": "npm run db:generate && tsc && cp -r src/generated dist/",
     "dev": "npm run db:generate && tsc --watch",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

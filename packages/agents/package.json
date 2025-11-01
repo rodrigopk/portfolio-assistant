@@ -1,7 +1,6 @@
 {
   "name": "@portfolio/agents",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
   "description": "AI agents for portfolio chat and automation",
   "main": "./dist/index.js",

@@ -4,11 +4,7 @@
  */
 
 import { config } from 'dotenv';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from 'path';
 
 export interface DatabaseConfig {
   databaseUrl: string;
@@ -36,7 +32,7 @@ export function loadDatabaseConfig(environment?: string): DatabaseConfig {
   config();
 
   // Load environment-specific variables
-  const envFile = join(__dirname, '..', 'env', `.env.${env}`);
+  const envFile = join(process.cwd(), 'packages', 'database', 'env', `.env.${env}`);
   config({ path: envFile });
 
   // Validate required variables

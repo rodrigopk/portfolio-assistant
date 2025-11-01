@@ -183,7 +183,7 @@ export class ProjectService {
       const categoriesResult = await prisma.project.findMany({
         select: { category: true },
         where: {
-          AND: [{ category: { not: null } }, { category: { not: '' } }],
+          category: { not: '' },
         },
         distinct: ['category'],
         orderBy: { category: 'asc' },

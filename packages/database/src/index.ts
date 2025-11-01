@@ -4,15 +4,15 @@
  */
 
 // Export Prisma client and types
-export { PrismaClient } from './generated/client/index.js';
-export type { Profile, Project, Conversation, Prisma } from './generated/client/index.js';
+export { PrismaClient } from './generated/client/index';
+export type { Profile, Project, Conversation, Prisma } from './generated/client/index';
 
 // Export repository classes and types
-export { ConversationRepository } from './conversation-repository.js';
-export type { MessageData } from './conversation-repository.js';
+export { ConversationRepository } from './conversation-repository';
+export type { MessageData } from './conversation-repository';
 
 // Export database connection and pooling
-export { database, createDatabaseConnection, type ConnectionPoolConfig } from './connection.js';
+export { database, createDatabaseConnection, type ConnectionPoolConfig } from './connection';
 
 // Export monitoring utilities
 export {
@@ -21,7 +21,7 @@ export {
   createHealthCheckMiddleware,
   getPerformanceRecommendations,
   type DatabaseMetrics,
-} from './monitoring.js';
+} from './monitoring';
 
 // Export configuration utilities
 export {
@@ -31,11 +31,11 @@ export {
   validateDatabaseConfig,
   databaseConfig,
   type DatabaseConfig,
-} from './config.js';
+} from './config';
 
 // Legacy exports for backward compatibility
-import { database } from './connection.js';
-import { PrismaClient } from './generated/client/index.js';
+import { database } from './connection';
+import { PrismaClient } from './generated/client/index';
 
 /**
  * Get the singleton PrismaClient instance (legacy)
