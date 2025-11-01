@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@mastra/core": "^0.1.0",
+    "@portfolio/agents": "*",
     "@prisma/client": "^5.7.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.0",

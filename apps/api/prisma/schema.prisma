@@ -55,3 +55,16 @@ model Project {
   @@index([category])
   @@index([slug])
 }
+
+model Conversation {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique
+  messages     Json[]   // Array of message objects
+  metadata     Json?    // Visitor info, referrer, etc.
+  lastActivity DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([lastActivity])
+}
