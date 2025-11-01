@@ -205,7 +205,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
         sessionId,
       });
     },
-    [isAuthenticated, sessionId, ws.sendMessage]
+    [isAuthenticated, sessionId, ws]
   );
 
   const clearMessages = useCallback(() => {
@@ -221,19 +221,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const reconnect = useCallback(() => {
     setError(null);
     ws.reconnect();
-  }, [ws.reconnect]);
+  }, [ws]);
 
   // Ping interval to keep connection alive
-  const { connectionStatus, sendMessage } = ws;
   useEffect(() => {
-    if (connectionStatus === 'connected') {
+    if (ws.connectionStatus === 'connected') {
       const interval = setInterval(() => {
-        sendMessage({ type: 'ping' });
+        ws.sendMessage({ type: 'ping' });
       }, 30000); // Ping every 30 seconds
 
       return () => clearInterval(interval);
     }
-  }, [connectionStatus, sendMessage]);
+  }, [ws]);
 
   const value: ChatContextValue = {
     isOpen,
