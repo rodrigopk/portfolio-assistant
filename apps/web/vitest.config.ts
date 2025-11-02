@@ -24,14 +24,14 @@ export default defineConfig({
         'tests/',
         '**/tests/e2e/**',
         '**/*.config.ts',
-        '**/*.config.js'
+        '**/*.config.js',
       ],
       thresholds: {
         statements: 80,
         branches: 80,
         functions: 80,
-        lines: 80
-      }
-    }
+        lines: 80,
+      },
+    },
   },
 });

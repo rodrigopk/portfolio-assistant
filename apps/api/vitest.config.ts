@@ -13,8 +13,8 @@ export default defineConfig({
         statements: 80,
         branches: 80,
         functions: 80,
-        lines: 80
-      }
+        lines: 80,
+      },
     },
     setupFiles: ['./src/__tests__/setup.ts'],
   },
