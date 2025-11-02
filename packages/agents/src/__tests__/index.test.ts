@@ -3,6 +3,14 @@ import { describe, it, expect, vi } from 'vitest';
 // Mock @portfolio/database to prevent DATABASE_URL issues
 vi.mock('@portfolio/database', () => ({
   ConversationRepository: vi.fn(),
+  PrismaClient: vi.fn().mockImplementation(() => ({
+    $disconnect: vi.fn(),
+    ragEmbedding: {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+  })),
 }));
 
 // Mock @prisma/client to prevent DATABASE_URL issues
@@ -96,12 +104,43 @@ describe('Agents Package Exports', () => {
       expect(exports.searchProjects).toBeDefined();
       expect(exports.searchBlogPosts).toBeDefined();
       expect(exports.suggestProposal).toBeDefined();
+      expect(exports.searchContext).toBeDefined();
 
       expect(typeof exports.checkAvailability).toBe('function');
       expect(typeof exports.getProjectDetails).toBe('function');
       expect(typeof exports.searchProjects).toBe('function');
       expect(typeof exports.searchBlogPosts).toBe('function');
       expect(typeof exports.suggestProposal).toBe('function');
+      expect(typeof exports.searchContext).toBe('function');
+    });
+  });
+
+  describe('RAG functionality exports', () => {
+    it('should export RAG core classes', async () => {
+      const exports = await import('../index');
+
+      expect(exports.VectorStore).toBeDefined();
+      expect(exports.RetrievalService).toBeDefined();
+      expect(typeof exports.VectorStore).toBe('function');
+      expect(typeof exports.RetrievalService).toBe('function');
+    });
+
+    it('should export embedding functions', async () => {
+      const exports = await import('../index');
+
+      expect(exports.generateEmbedding).toBeDefined();
+      expect(exports.chunkText).toBeDefined();
+      expect(exports.generateEmbeddingsBatch).toBeDefined();
+      expect(typeof exports.generateEmbedding).toBe('function');
+      expect(typeof exports.chunkText).toBe('function');
+      expect(typeof exports.generateEmbeddingsBatch).toBe('function');
+    });
+
+    it('should export default RAG instances', async () => {
+      const exports = await import('../index');
+
+      expect(exports.defaultVectorStore).toBeDefined();
+      expect(exports.defaultRetrievalService).toBeDefined();
     });
   });
 
@@ -111,7 +150,8 @@ describe('Agents Package Exports', () => {
       const exportKeys = Object.keys(exports);
 
       // Should have a reasonable number of exports (at least the core ones)
-      expect(exportKeys.length).toBeGreaterThan(10);
+      // With RAG functionality, we should have significantly more exports
+      expect(exportKeys.length).toBeGreaterThan(20);
     });
 
     it('should not export undefined values', async () => {
