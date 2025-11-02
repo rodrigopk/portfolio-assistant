@@ -2,12 +2,11 @@
  * Tests for RAG Embeddings Service
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   chunkText,
   estimateTokenCount,
   prepareContentForIndexing,
-  generateEmbedding,
   chunkAndEmbed,
 } from '../rag/embeddings';
 

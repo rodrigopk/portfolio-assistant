@@ -25,7 +25,11 @@ vi.mock('../rag/vector-store', () => ({
 
 describe('RAG Retrieval Service', () => {
   let retrievalService: RetrievalService;
-  let mockVectorStore: any;
+  let mockVectorStore: {
+    searchSimilar: ReturnType<typeof vi.fn>;
+    getChunksBySource: ReturnType<typeof vi.fn>;
+    disconnect: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockVectorStore = new VectorStore();

@@ -117,7 +117,8 @@ export class VectorStore {
   }
 
   /**
-   * Store multiple chunks in batch
+   * Store multiple chunks in batch using a single INSERT statement
+   * This is much more efficient than N sequential inserts
    */
   async storeChunksBatch(
     chunks: ChunkWithEmbedding[],
@@ -126,29 +127,67 @@ export class VectorStore {
     metadata?: ContentMetadata,
     category?: string
   ): Promise<StoredChunk[]> {
-    const storedChunks: StoredChunk[] = [];
-
-    for (const chunk of chunks) {
-      const stored = await this.storeChunk(
-        chunk.content,
-        chunk.embedding,
-        sourceType,
-        sourceId,
-        chunk.index,
-        chunk.tokenCount,
-        metadata,
-        category
-      );
-      storedChunks.push(stored);
+    if (chunks.length === 0) {
+      return [];
     }
 
-    logger.info('Chunks stored in batch', {
-      sourceType,
-      sourceId,
-      chunkCount: chunks.length,
-    });
+    try {
+      // Build VALUES clause with proper parameter indexing
+      const metadataJson = JSON.stringify(metadata || {});
+      const values: string[] = [];
+      const params: (string | number | null)[] = [];
+      let paramIndex = 1;
 
-    return storedChunks;
+      for (const chunk of chunks) {
+        const embeddingStr = `[${chunk.embedding.join(',')}]`;
+
+        values.push(
+          `(gen_random_uuid()::text, $${paramIndex}, $${paramIndex + 1}::vector, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}::jsonb, $${paramIndex + 6}, $${paramIndex + 7}, NOW(), NOW())`
+        );
+
+        params.push(
+          chunk.content,
+          embeddingStr,
+          sourceType,
+          sourceId,
+          category || null,
+          metadataJson,
+          chunk.index,
+          chunk.tokenCount
+        );
+
+        paramIndex += 8;
+      }
+
+      const query = `
+        INSERT INTO "ContentChunk" (
+          id, content, embedding, "sourceType", "sourceId", category,
+          metadata, "chunkIndex", "tokenCount", "createdAt", "updatedAt"
+        )
+        VALUES ${values.join(', ')}
+        RETURNING *
+      `;
+
+      const storedChunks = await this.prisma.$queryRawUnsafe<StoredChunk[]>(query, ...params);
+
+      logger.info('Chunks stored in batch', {
+        sourceType,
+        sourceId,
+        chunkCount: chunks.length,
+      });
+
+      return storedChunks;
+    } catch (error) {
+      logger.error('Failed to store chunks in batch', {
+        error,
+        sourceType,
+        sourceId,
+        chunkCount: chunks.length,
+      });
+      throw new Error(
+        `Failed to store chunks in batch: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 
   /**
@@ -173,8 +212,10 @@ export class VectorStore {
 
       // Build WHERE clause based on filters
       const conditions: string[] = [];
-      const params: (string | number)[] = [embeddingStr, embeddingStr, embeddingStr, topK];
-      let paramIndex = 5;
+      // Note: We use the same embedding parameter ($1) for all three operators in the query
+      // This is more efficient than passing the same value three times
+      const params: (string | number)[] = [embeddingStr, topK];
+      let paramIndex = 3;
 
       if (filters?.sourceType) {
         conditions.push(`"sourceType" = $${paramIndex}`);
@@ -195,7 +236,8 @@ export class VectorStore {
       const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
       // Perform vector similarity search using cosine distance
-      // Note: 1 - (embedding <=> query) gives cosine similarity
+      // Note: We reuse $1 for all vector operations to avoid redundant parameter passing
+      // The <=> operator computes cosine distance, and 1 - distance gives similarity
       const query = `
         SELECT
           id,
@@ -209,11 +251,11 @@ export class VectorStore {
           "createdAt",
           "updatedAt",
           (embedding <=> $1::vector) as distance,
-          (1 - (embedding <=> $2::vector)) as similarity
+          (1 - (embedding <=> $1::vector)) as similarity
         FROM "ContentChunk"
         ${whereClause}
-        ORDER BY embedding <=> $3::vector
-        LIMIT $4
+        ORDER BY embedding <=> $1::vector
+        LIMIT $2
       `;
 
       const results = await this.prisma.$queryRawUnsafe<

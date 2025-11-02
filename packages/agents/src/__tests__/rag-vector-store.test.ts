@@ -19,11 +19,15 @@ vi.mock('@portfolio/database', () => ({
 
 describe('RAG Vector Store', () => {
   let vectorStore: VectorStore;
-  let mockPrisma: any;
+  let mockPrisma: {
+    $queryRawUnsafe: ReturnType<typeof vi.fn>;
+    $executeRawUnsafe: ReturnType<typeof vi.fn>;
+    $disconnect: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
-    mockPrisma = new PrismaClient();
-    vectorStore = new VectorStore(mockPrisma);
+    mockPrisma = new PrismaClient() as typeof mockPrisma;
+    vectorStore = new VectorStore(mockPrisma as unknown as PrismaClient);
   });
 
   afterEach(async () => {

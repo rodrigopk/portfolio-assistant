@@ -16,6 +16,21 @@ import { generateEmbedding } from './embeddings';
 import { VectorStore, type SearchResult } from './vector-store';
 import { logger } from '../lib/logger';
 
+// Default retrieval configuration
+const DEFAULT_TOP_K = 5;
+const DEFAULT_MIN_SIMILARITY = 0.5;
+const DEFAULT_INCLUDE_METADATA = true;
+const RETRIEVAL_MULTIPLIER = 2; // Retrieve 2x results for re-ranking
+
+// Re-ranking score weights
+const SIMILARITY_MULTIPLIER = 10; // Base similarity score multiplier
+const KEYWORD_BOOST_WEIGHT = 0.5; // Weight for content keyword matches
+const METADATA_BOOST_WEIGHT = 0.3; // Weight for metadata keyword matches
+const PROJECT_TYPE_BOOST = 0.2; // Boost for project source type
+
+// Formatting configuration
+const SIMILARITY_DECIMAL_PRECISION = 2; // Decimal places for similarity display
+
 export interface RetrievalOptions {
   topK?: number;
   sourceType?: string;
@@ -59,7 +74,13 @@ export class RetrievalService {
   async retrieveContext(query: string, options: RetrievalOptions = {}): Promise<RAGContext> {
     const startTime = Date.now();
 
-    const { topK = 5, sourceType, category, minSimilarity = 0.5, includeMetadata = true } = options;
+    const {
+      topK = DEFAULT_TOP_K,
+      sourceType,
+      category,
+      minSimilarity = DEFAULT_MIN_SIMILARITY,
+      includeMetadata = DEFAULT_INCLUDE_METADATA,
+    } = options;
 
     try {
       // Step 1: Convert query to embedding
@@ -70,7 +91,7 @@ export class RetrievalService {
       logger.debug('Searching for similar chunks', { topK, sourceType, category });
       const searchResults = await this.vectorStore.searchSimilar(
         embedding,
-        topK * 2, // Retrieve more results for re-ranking
+        topK * RETRIEVAL_MULTIPLIER, // Retrieve more results for re-ranking
         { sourceType, category }
       );
 
@@ -140,23 +161,23 @@ export class RetrievalService {
 
     // Calculate re-ranking score for each result
     const scoredResults = results.map((result) => {
-      let score = result.similarity * 10; // Base score from similarity
+      let score = result.similarity * SIMILARITY_MULTIPLIER; // Base score from similarity
 
       // Boost for keyword matches in content
       const contentLower = result.chunk.content.toLowerCase();
       const keywordMatches = queryTerms.filter((term) => contentLower.includes(term)).length;
-      score += keywordMatches * 0.5;
+      score += keywordMatches * KEYWORD_BOOST_WEIGHT;
 
       // Boost for metadata matches
       if (result.chunk.metadata) {
         const metadataStr = JSON.stringify(result.chunk.metadata).toLowerCase();
         const metadataMatches = queryTerms.filter((term) => metadataStr.includes(term)).length;
-        score += metadataMatches * 0.3;
+        score += metadataMatches * METADATA_BOOST_WEIGHT;
       }
 
       // Boost for "project" source type (most common queries)
       if (result.chunk.sourceType === 'project') {
-        score += 0.2;
+        score += PROJECT_TYPE_BOOST;
       }
 
       return {
@@ -185,7 +206,7 @@ export class RetrievalService {
 
     const sections = contexts.map((ctx, index) => {
       const parts = [
-        `[Context ${index + 1}] (${ctx.sourceType}, similarity: ${ctx.similarity.toFixed(2)})`,
+        `[Context ${index + 1}] (${ctx.sourceType}, similarity: ${ctx.similarity.toFixed(SIMILARITY_DECIMAL_PRECISION)})`,
         ctx.content,
       ];
 
