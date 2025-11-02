@@ -1301,34 +1301,416 @@ VITE_WS_URL=ws://localhost:3001
 
 ### 7.3 Testing Strategy
 
-#### 7.3.1 Running Tests
+DevPortfolio AI maintains comprehensive testing standards to ensure code quality, reliability, and maintainability. Our testing strategy covers unit tests, integration tests, component tests, and end-to-end tests.
+
+#### 7.3.1 Testing Standards & Requirements
+
+**Coverage Requirements:**
+
+- Minimum 80% coverage for statements, branches, functions, and lines
+- Critical paths (authentication, data processing, AI interactions) require 90%+ coverage
+- Coverage thresholds are enforced in CI/CD pipeline
+- Tests must not only pass but meet coverage targets
+
+**Test Organization:**
+
+- Unit tests: Test individual functions/methods in isolation
+- Integration tests: Test API endpoints and service interactions
+- Component tests: Test React components with user interactions
+- End-to-end tests: Test complete user workflows with Playwright
+
+#### 7.3.2 Running Tests
 
 ```bash
 # Run all tests
 npm test
 
-# Run tests in watch mode
+# Run tests in watch mode (development)
 npm test -- --watch
 
-# Run tests with coverage
-npm test -- --coverage
+# Run tests with coverage reporting
+npm test:coverage
 
 # Run specific test file
-npm test chat-agent.test.ts
+npm test profile.test.ts
+
+# Run tests for specific package
+cd apps/api && npm test
+cd apps/web && npm test
+cd packages/agents && npm test
+
+# Run E2E tests
+cd apps/web && npm run test:e2e
 ```
 
-#### 7.3.2 Test Structure
+#### 7.3.3 Test Database Setup
+
+**Local Development:**
+
+```bash
+# Start test database with Docker
+docker-compose up -d postgres redis
+
+# Setup test database schema
+cd apps/api && npx prisma db push --skip-generate
+
+# Environment variables for testing
+export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/portfolio_test
+export REDIS_URL=redis://localhost:6379
+```
+
+**CI/CD Environment:**
+
+- PostgreSQL 16 service with health checks
+- Redis 7 service for caching tests
+- Automatic schema setup via Prisma
+- Coverage reports uploaded to Codecov
+
+#### 7.3.4 Unit Test Examples
+
+**Service Layer Testing:**
 
 ```typescript
-// Example unit test
-describe('ChatAgent', () => {
-  it('should respond to greeting', async () => {
-    const agent = new ChatAgent();
-    const response = await agent.chat('Hello');
-    expect(response).toContain('Hi');
+// apps/api/src/__tests__/profile.test.ts
+describe('ProfileService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return profile from database when cache is empty', async () => {
+    // Arrange
+    vi.spyOn(cache, 'get').mockResolvedValue(null);
+    vi.spyOn(cache, 'set').mockResolvedValue(undefined);
+    vi.spyOn(prisma.profile, 'findFirst').mockResolvedValue(mockProfile);
+
+    // Act
+    const result = await profileService.getProfile();
+
+    // Assert
+    expect(result).toEqual(expectedResponse);
+    expect(cache.get).toHaveBeenCalledWith('profile:main');
+    expect(prisma.profile.findFirst).toHaveBeenCalled();
+    expect(cache.set).toHaveBeenCalledWith('profile:main', expectedResponse, 3600);
+  });
+
+  it('should return cached profile when available', async () => {
+    // Arrange
+    vi.spyOn(cache, 'get').mockResolvedValue(cachedProfile);
+
+    // Act
+    const result = await profileService.getProfile();
+
+    // Assert
+    expect(result).toEqual(cachedProfile);
+    expect(prisma.profile.findFirst).not.toHaveBeenCalled();
   });
 });
 ```
+
+**AI Agent Testing:**
+
+```typescript
+// packages/agents/src/__tests__/chat-agent.test.ts
+describe('ChatAgent', () => {
+  it('should respond to greeting with appropriate message', async () => {
+    // Arrange
+    const agent = new ChatAgent();
+    const mockResponse = "Hello! I'm here to help you learn about Rodrigo's experience.";
+    vi.spyOn(agent, 'chat').mockResolvedValue(mockResponse);
+
+    // Act
+    const response = await agent.chat('Hello');
+
+    // Assert
+    expect(response).toContain('Hello');
+    expect(response).toContain('Rodrigo');
+  });
+
+  it('should search projects when asked about work', async () => {
+    // Arrange
+    const searchProjectsSpy = vi.spyOn(toolExecutor, 'searchProjects');
+
+    // Act
+    await agent.chat('Tell me about your React projects');
+
+    // Assert
+    expect(searchProjectsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining('React'),
+        technologies: expect.arrayContaining(['React']),
+      })
+    );
+  });
+});
+```
+
+#### 7.3.5 Integration Test Examples
+
+**API Endpoint Testing:**
+
+```typescript
+// apps/api/src/__tests__/project.test.ts
+describe('GET /api/projects', () => {
+  it('should return 200 and projects with proper pagination', async () => {
+    // Arrange
+    vi.spyOn(prisma.project, 'count').mockResolvedValue(25);
+    vi.spyOn(prisma.project, 'findMany').mockResolvedValue(mockProjects);
+
+    // Act
+    const response = await request(app).get('/api/projects?limit=10&offset=0');
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(10);
+    expect(response.body.meta.total).toBe(25);
+    expect(response.body.meta.hasMore).toBe(true);
+
+    // Verify caching headers
+    expect(response.headers['cache-control']).toBe('public, max-age=1800');
+  });
+
+  it('should filter projects by technology', async () => {
+    // Arrange
+    const techFilter = ['React', 'TypeScript'];
+
+    // Act
+    const response = await request(app).get(`/api/projects?tech=${techFilter.join(',')}`);
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(prisma.project.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          technologies: { hasSome: techFilter },
+        },
+      })
+    );
+  });
+});
+```
+
+#### 7.3.6 Component Test Examples
+
+**React Component Testing:**
+
+```typescript
+// apps/web/src/components/__tests__/ProjectFilters.test.tsx
+describe('ProjectFilters', () => {
+  const defaultProps = {
+    categories: ['web', 'mobile', 'backend'],
+    technologies: ['React', 'TypeScript', 'Node.js'],
+    onFilterChange: vi.fn()
+  };
+
+  it('should render all filter sections', () => {
+    // Act
+    render(<ProjectFilters {...defaultProps} />);
+
+    // Assert
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+    expect(screen.getByLabelText('Show only featured projects')).toBeInTheDocument();
+    expect(screen.getByText('Category')).toBeInTheDocument();
+    expect(screen.getByText('Technologies')).toBeInTheDocument();
+  });
+
+  it('should handle category filter selection', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    render(<ProjectFilters {...defaultProps} />);
+
+    // Act
+    await user.click(screen.getByRole('button', { name: 'web' }));
+
+    // Assert
+    expect(defaultProps.onFilterChange).toHaveBeenCalledWith({
+      category: 'web'
+    });
+  });
+
+  it('should be accessible via keyboard navigation', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    render(<ProjectFilters {...defaultProps} />);
+
+    // Act
+    await user.tab(); // Focus on featured checkbox
+    await user.keyboard('{Enter}'); // Activate featured filter
+
+    // Assert
+    expect(defaultProps.onFilterChange).toHaveBeenCalledWith({
+      featured: true
+    });
+  });
+});
+```
+
+#### 7.3.7 Mock Infrastructure
+
+**Database Mocking (apps/api/src/**tests**/setup.ts):**
+
+```typescript
+import { vi } from 'vitest';
+
+// Mock Prisma client
+export const mockPrismaClient = {
+  profile: {
+    findFirst: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  project: {
+    findMany: vi.fn(),
+    findFirst: vi.fn(),
+    count: vi.fn(),
+    create: vi.fn(),
+  },
+  $disconnect: vi.fn(),
+  $connect: vi.fn(),
+};
+
+vi.mock('@portfolio/database', () => ({
+  prisma: mockPrismaClient,
+}));
+
+// Mock Redis/Cache
+export const mockCache = {
+  get: vi.fn(),
+  set: vi.fn(),
+  del: vi.fn(),
+};
+
+vi.mock('@/lib/cache', () => ({
+  cache: mockCache,
+}));
+```
+
+**API Client Mocking (apps/web/src/test/setup.ts):**
+
+```typescript
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom';
+
+// Clean up after each test
+afterEach(() => {
+  cleanup();
+});
+
+// Mock API calls with MSW (Mock Service Worker)
+import { setupServer } from 'msw/node';
+import { handlers } from './mocks/handlers';
+
+export const server = setupServer(...handlers);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+#### 7.3.8 Test Utilities & Helpers
+
+**Custom Render Helper:**
+
+```typescript
+// apps/web/src/test/test-utils.tsx
+import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        {children}
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
+const customRender = (
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => render(ui, { wrapper: AllTheProviders, ...options });
+
+export * from '@testing-library/react';
+export { customRender as render };
+```
+
+#### 7.3.9 Coverage Configuration
+
+**Vitest Coverage Settings:**
+
+```typescript
+// All vitest.config.ts files include:
+coverage: {
+  provider: 'v8',
+  reporter: ['text', 'json', 'html'],
+  thresholds: {
+    statements: 80,
+    branches: 80,
+    functions: 80,
+    lines: 80
+  },
+  exclude: [
+    'node_modules/',
+    'dist/',
+    'tests/',
+    '**/*.config.ts',
+    '**/*.config.js'
+  ]
+}
+```
+
+**CI/CD Coverage Enforcement:**
+
+- Tests fail if coverage drops below 80%
+- Coverage reports uploaded to Codecov
+- PR comments show coverage changes
+- Coverage badges in README
+
+#### 7.3.10 Best Practices
+
+**Test Organization:**
+
+- Group related tests in `describe` blocks
+- Use clear, descriptive test names starting with "should"
+- Follow Arrange-Act-Assert pattern
+- One assertion per test (when possible)
+
+**Mock Strategy:**
+
+- Mock external dependencies (databases, APIs, file system)
+- Use real objects for business logic testing
+- Provide meaningful mock data that reflects real scenarios
+- Clear mocks between tests to avoid interference
+
+**Performance:**
+
+- Use `vi.fn()` for simple mocks
+- Leverage `beforeEach`/`afterEach` for test setup/cleanup
+- Group slow tests separately
+- Parallelize test execution when possible
+
+**Accessibility Testing:**
+
+- Test ARIA attributes and roles
+- Verify keyboard navigation
+- Check focus management
+- Test screen reader compatibility
+
+**Error Handling:**
+
+- Test both success and failure scenarios
+- Verify proper error messages
+- Test error boundaries in React components
+- Validate error logging and monitoring
 
 ### 7.4 Code Style Guidelines
 
