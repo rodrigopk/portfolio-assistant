@@ -20,3 +20,6 @@ export type { CheckAvailabilityInput } from './checkAvailability';
 
 export { suggestProposal, suggestProposalSchema, suggestProposalTool } from './suggestProposal';
 export type { SuggestProposalInput } from './suggestProposal';
+
+export { searchContext, searchContextTool } from './searchContext';
+export type { SearchContextInput } from './searchContext';

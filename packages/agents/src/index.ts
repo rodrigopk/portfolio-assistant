@@ -14,3 +14,6 @@ export {
   limitConversationHistory,
 } from './utils/message-formatter';
 export { loadConversationHistory, saveConversation } from './utils/conversation-store';
+
+// Export RAG functionality
+export * from './rag';
