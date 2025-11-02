@@ -9,6 +9,8 @@ import {
   checkAvailabilityTool,
   suggestProposal,
   suggestProposalTool,
+  searchContext,
+  searchContextTool,
 } from '../tools';
 
 /**
@@ -20,6 +22,7 @@ export const AGENT_TOOLS = [
   searchBlogPostsTool,
   checkAvailabilityTool,
   suggestProposalTool,
+  searchContextTool,
 ];
 
 /**
@@ -38,6 +41,8 @@ export async function executeTool(toolName: string, toolInput: Record<string, un
         return await checkAvailability(toolInput as Parameters<typeof checkAvailability>[0]);
       case 'suggestProposal':
         return await suggestProposal(toolInput as Parameters<typeof suggestProposal>[0]);
+      case 'searchContext':
+        return await searchContext(toolInput as Parameters<typeof searchContext>[0]);
       default:
         return { error: `Unknown tool: ${toolName}` };
     }

@@ -13,13 +13,15 @@ vi.mock('../tools', () => ({
   checkAvailabilityTool: { name: 'checkAvailability' },
   suggestProposal: vi.fn(),
   suggestProposalTool: { name: 'suggestProposal' },
+  searchContext: vi.fn(),
+  searchContextTool: { name: 'searchContext' },
 }));
 
 describe('tool-executor', () => {
   describe('AGENT_TOOLS', () => {
     it('should export an array of tools', () => {
       expect(Array.isArray(AGENT_TOOLS)).toBe(true);
-      expect(AGENT_TOOLS.length).toBe(5);
+      expect(AGENT_TOOLS.length).toBe(6); // Updated to include searchContext
     });
   });
 
