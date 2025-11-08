@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import authRouter from './auth';
 import githubRouter from './github';
 import healthRouter from './health';
 import profileRouter from './profile';
@@ -9,6 +10,9 @@ const router = Router();
 
 // Health check routes
 router.use('/health', healthRouter);
+
+// Authentication routes
+router.use('/auth', authRouter);
 
 // Profile routes
 router.use('/profile', profileRouter);

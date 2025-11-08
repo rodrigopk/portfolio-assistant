@@ -25,14 +25,11 @@ vi.mock('../lib/redis', () => ({
   },
 }));
 
-const mockListForUser = vi.fn();
-const mockListLanguages = vi.fn();
-
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn().mockImplementation(() => ({
     repos: {
-      listForUser: mockListForUser,
-      listLanguages: mockListLanguages,
+      listForUser: vi.fn(),
+      listLanguages: vi.fn(),
     },
   })),
 }));
