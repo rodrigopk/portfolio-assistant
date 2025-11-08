@@ -2,6 +2,10 @@
 import request from 'supertest';
 import { describe, it, expect, beforeEach, vi, afterAll, beforeAll } from 'vitest';
 
+// Mock environment variables before importing
+vi.stubEnv('GITHUB_TOKEN', 'test-token');
+vi.stubEnv('GITHUB_USERNAME', 'test-user');
+
 import app from '../app';
 import { connectRedis, disconnectRedis } from '../lib/redis';
 import { githubService } from '../services/github.service';
