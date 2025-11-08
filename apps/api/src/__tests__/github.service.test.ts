@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Mock environment variables before importing service
+vi.stubEnv('GITHUB_TOKEN', 'test-token');
+vi.stubEnv('GITHUB_USERNAME', 'test-user');
+
 import { prisma } from '../lib/prisma';
 import { cache } from '../lib/redis';
 import { githubService } from '../services/github.service';
