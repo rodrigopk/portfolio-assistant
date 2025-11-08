@@ -854,7 +854,11 @@ describe('Project API - Integration Tests', () => {
     });
 
     it('should match filters response schema', async () => {
+      // Complete mock reset to ensure clean state
       vi.clearAllMocks();
+      vi.resetAllMocks();
+
+      // Mock cache to ensure we don't use cached data
       vi.spyOn(cache, 'get').mockResolvedValue(null);
       vi.spyOn(cache, 'set').mockResolvedValue(undefined);
 
@@ -864,7 +868,10 @@ describe('Project API - Integration Tests', () => {
         { technologies: ['React Native', 'Firebase'] },
       ];
 
-      vi.spyOn(prismaTyped.project, 'findMany')
+      // Create a fresh mock for findMany to avoid pollution from other tests
+      const mockFindMany = vi.spyOn(prismaTyped.project, 'findMany');
+      mockFindMany.mockClear();
+      mockFindMany
         .mockResolvedValueOnce(categoriesResponse as any)
         .mockResolvedValueOnce(technologiesResponse as any);
 
@@ -880,7 +887,11 @@ describe('Project API - Integration Tests', () => {
       expect(Array.isArray(data.categories)).toBe(true);
       expect(Array.isArray(data.technologies)).toBe(true);
 
-      // Verify data types
+      // Verify arrays have content
+      expect(data.categories.length).toBeGreaterThan(0);
+      expect(data.technologies.length).toBeGreaterThan(0);
+
+      // Verify data types (only check if arrays have content)
       data.categories.forEach((category: any) => {
         expect(typeof category).toBe('string');
       });

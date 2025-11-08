@@ -8,7 +8,24 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'dist/', 'tests/', '**/*.config.ts', '**/*.config.js'],
+      exclude: [
+        'node_modules/',
+        'dist/',
+        'tests/',
+        'prisma/',
+        '**/*.config.ts',
+        '**/*.config.js',
+        'src/index.ts', // Entry point - hard to test in isolation
+        'src/lib/prisma.ts', // Database connection - integration only
+        'src/lib/redis.ts', // Redis connection - integration only
+        'src/types/profile.types.ts', // Just type definitions
+      ],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
     },
     setupFiles: ['./src/__tests__/setup.ts'],
   },
