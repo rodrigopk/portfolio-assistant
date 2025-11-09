@@ -23,9 +23,21 @@ const SYNC_RESULTS_TTL_SECONDS = 60 * 60; // 1 hour
  * Per TECHNICAL_DOCUMENTATION.md Section 3.4
  */
 export class GitHubService {
-  private octokit: Octokit;
+  private octokit: Octokit | null = null;
 
   constructor() {
+    // Lazy initialization - octokit will be created when first needed
+  }
+
+  /**
+   * Get or create Octokit instance
+   * Validates environment variables on first use
+   */
+  private getOctokit(): Octokit {
+    if (this.octokit) {
+      return this.octokit;
+    }
+
     if (!GITHUB_TOKEN) {
       throw new Error('GITHUB_TOKEN environment variable is required');
     }
@@ -36,6 +48,8 @@ export class GitHubService {
     this.octokit = new Octokit({
       auth: GITHUB_TOKEN,
     });
+
+    return this.octokit;
   }
 
   /**
@@ -213,7 +227,7 @@ export class GitHubService {
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const response = await this.octokit.repos.listForUser({
+        const response = await this.getOctokit().repos.listForUser({
           username: GITHUB_USERNAME!,
           per_page: perPage,
           page,
@@ -297,7 +311,7 @@ export class GitHubService {
       if (!owner || !repo) {
         return {};
       }
-      const response = await this.octokit.repos.listLanguages({
+      const response = await this.getOctokit().repos.listLanguages({
         owner,
         repo,
       });
