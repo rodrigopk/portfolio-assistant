@@ -1,5 +1,19 @@
 import { vi } from 'vitest';
 
+// Stub environment variables required by services
+vi.stubEnv('GITHUB_TOKEN', 'test-github-token');
+vi.stubEnv('GITHUB_USERNAME', 'test-github-user');
+
+// Mock the logger to prevent console output during tests
+vi.mock('../utils/logger', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 // Create a mock Prisma client with all the methods needed by the API
 const mockPrismaClient = {
   profile: {
